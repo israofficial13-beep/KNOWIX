@@ -1,0 +1,2301 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowix - Competitive Exam Learning Platform</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts (Inter) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'glow-green': '0 0 20px rgba(16, 185, 129, 0.4)',
+            'glow-red': '0 0 20px rgba(239, 68, 68, 0.4)',
+            'neon-blue': '0 0 15px rgba(99, 102, 241, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Premium styling and micro-interactions */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b1329;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .glow-green-on-correct {
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+      border-color: #10b981 !important;
+    }
+    .glow-red-on-wrong {
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+      border-color: #ef4444 !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white dark:bg-slate-950 light:bg-slate-50 transition-colors duration-200">
+
+  <!-- TOP NOTIFICATION ALERT SYSTEM -->
+  <div id="notification-bar" class="fixed top-4 right-4 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-indigo-600 text-white px-4 py-3 rounded-2xl shadow-2xl border border-indigo-500/30 flex items-center gap-3">
+      <i data-lucide="bell" class="w-5 h-5 animate-bounce"></i>
+      <div>
+        <h4 class="text-xs font-bold font-mono uppercase tracking-wide">Notification</h4>
+        <p id="notification-text" class="text-xs text-indigo-100 font-medium">Platform loaded successfully!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONBOARDING GATEWAY (If not registered) -->
+  <div id="onboarding-screen" class="hidden min-h-screen flex flex-col justify-between py-8 relative">
+    <div class="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-indigo-500/10 via-transparent to-transparent pointer-events-none"></div>
+    <header class="max-w-6xl mx-auto px-4 w-full flex justify-between items-center z-10">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-2xl border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.15)]">
+          <svg viewBox="0 0 100 100" class="w-8 h-8 fill-none stroke-current stroke-2">
+            <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" stroke-width="2.5" stroke-linejoin="round" />
+            <circle cx="50" cy="50" r="28" stroke-width="1" stroke-dasharray="3,3" opacity="0.6" />
+            <path d="M 38,30 L 38,70 M 38,50 L 60,30 M 38,50 L 62,70" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="60" cy="30" r="3.5" fill="currentColor" />
+            <circle cx="62" cy="70" r="3.5" fill="currentColor" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-100 via-indigo-400 to-cyan-500 bg-clip-text text-transparent">Knowix Gateway</h1>
+          <p class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Competitive Academy Entry Portal</p>
+        </div>
+      </div>
+      <button onclick="openOwnerLoginModal()" class="text-xs bg-slate-900 hover:bg-slate-800 text-indigo-400 border border-slate-800 px-3 py-1.5 rounded-xl flex items-center gap-2">
+        <i data-lucide="lock" class="w-3.5 h-3.5"></i> Owner Admin
+      </button>
+    </header>
+
+    <main class="flex-1 max-w-md w-full mx-auto px-4 flex flex-col justify-center z-10">
+      <div class="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md space-y-6">
+        <div class="text-center space-y-2">
+          <div class="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto shadow-md">
+            <i data-lucide="user" class="w-6 h-6"></i>
+          </div>
+          <h2 class="text-xl font-bold text-slate-100">Setup Exam Account</h2>
+          <p class="text-xs text-slate-400 leading-relaxed">Join Kerala's premier competitive learning system. Input your details to track achievements, daily login streaks, and ranks.</p>
+        </div>
+
+        <form id="registration-form" onsubmit="handleRegistration(event)" class="space-y-4">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Full Name</label>
+            <div class="relative">
+              <i data-lucide="user" class="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500"></i>
+              <input type="text" id="reg-name" required placeholder="Enter full name" class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none placeholder:text-slate-600 transition-all" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Mobile Phone</label>
+              <div class="relative">
+                <i data-lucide="phone" class="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500"></i>
+                <input type="tel" id="reg-phone" required placeholder="Phone number" class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none placeholder:text-slate-600 transition-all" />
+              </div>
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">WhatsApp Number</label>
+              <div class="relative">
+                <i data-lucide="message-square" class="absolute left-3.5 top-3.5 w-4 h-4 text-emerald-500/70"></i>
+                <input type="tel" id="reg-whatsapp" required placeholder="WhatsApp No." class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none placeholder:text-slate-600 transition-all" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Location / Place</label>
+            <div class="relative">
+              <i data-lucide="map-pin" class="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500"></i>
+              <input type="text" id="reg-place" required placeholder="E.g. Thrissur, Kerala" class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl py-3 pl-10 pr-4 text-xs text-slate-200 outline-none placeholder:text-slate-600 transition-all" />
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Primary Exam Focus</label>
+            <select id="reg-goal" required class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl py-3 px-4 text-xs text-slate-300 outline-none transition-all">
+              <option value="Kerala PSC (LDC/LGS/Deg)">Kerala PSC (LDC, LGS, Degree Level)</option>
+              <option value="UPSC Civil Services">UPSC Civil Services Examination</option>
+              <option value="Both & General GK Elite">Both & General GK Elite</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-slate-950 font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition-all">
+            Open Knowix Academy <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </div>
+    </main>
+    <footer class="text-center text-xs text-slate-600">© 2026 Knowix Platforms. All Rights Reserved.</footer>
+  </div>
+
+  <!-- MAIN PLATFORM INTERFACE -->
+  <div id="main-platform" class="hidden flex-1 flex flex-col">
+    <!-- NAVIGATION BAR -->
+    <header class="border-b border-slate-900 bg-slate-950/90 sticky top-0 z-40 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col lg:flex-row justify-between items-center gap-4">
+        
+        <!-- Brand & Logo -->
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-2xl border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.15)]">
+            <svg viewBox="0 0 100 100" class="w-7 h-7 fill-none stroke-current stroke-2">
+              <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" />
+              <path d="M 38,30 L 38,70 M 38,50 L 60,30" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-200 to-cyan-400 bg-clip-text text-transparent">Knowix</h1>
+              <span id="streak-badge" class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md text-[10px] font-mono flex items-center gap-1">
+                <i data-lucide="flame" class="w-3 h-3 fill-amber-500"></i> <span id="streak-count">1</span> Days
+              </span>
+              <span id="level-badge" class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold">Lvl <span id="user-level">1</span></span>
+            </div>
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Premium Competitive Exam Portal</p>
+          </div>
+        </div>
+
+        <!-- Dashboard Utilities (Search, Language, Theme, Profile pill, Owner Portal) -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Live Global Search Bar -->
+          <div class="relative w-48 sm:w-64">
+            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-500"></i>
+            <input type="text" id="global-search" oninput="handleGlobalSearch(this.value)" placeholder="Search questions, notes..." class="w-full bg-slate-900/80 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-all placeholder:text-slate-600" />
+          </div>
+
+          <!-- Dark/Light Mode toggle -->
+          <button onclick="toggleTheme()" class="p-2 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-700 text-slate-400 hover:text-white transition-all">
+            <i data-lucide="sun" id="theme-icon" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Multilingual Support Switch -->
+          <button onclick="toggleLanguage()" class="bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition-all">
+            <i data-lucide="languages" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <span id="lang-switch-lbl">Malayalam</span>
+          </button>
+
+          <!-- Owner Vault Activation -->
+          <button onclick="openOwnerLoginModal()" class="bg-indigo-950/40 hover:bg-indigo-900/50 border border-indigo-500/20 text-indigo-300 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+            <i data-lucide="database" class="w-4 h-4"></i>
+            <span data-lang-en="Owner Vault" data-lang-ml="ഓണർ വോൾട്ട്">Owner Vault</span>
+          </button>
+
+          <!-- User Quick Profile Pill -->
+          <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3.5 py-2 rounded-xl">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span id="profile-pill-name" class="text-xs font-bold text-slate-200">User</span>
+            <span id="profile-pill-xp" class="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded-md font-mono">0 XP</span>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- HUB SUB-NAVIGATION (CATEGORIZED SECTOR VIEWPORTS) -->
+    <nav class="bg-slate-900/40 border-b border-slate-900 py-2.5 overflow-x-auto">
+      <div class="max-w-7xl mx-auto px-4 flex gap-2">
+        <button onclick="switchTab('home')" class="tab-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all bg-indigo-600 text-white" id="tab-home">
+          <i data-lucide="home" class="w-4 h-4"></i> <span data-lang-en="Home" data-lang-ml="ഹോം">Home</span>
+        </button>
+        <button onclick="switchTab('daily')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200" id="tab-daily">
+          <i data-lucide="calendar" class="w-4 h-4 text-amber-400"></i> <span data-lang-en="Daily Quiz" data-lang-ml="ഡെയ്‌ലി ക്വിസ്">Daily Quiz</span>
+        </button>
+        <button onclick="switchTab('folders')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200" id="tab-folders">
+          <i data-lucide="folder-open" class="w-4 h-4 text-yellow-400"></i> <span data-lang-en="3 Study Cabinets" data-lang-ml="3 സ്റ്റഡി ക്യാബിനറ്റുകൾ">3 Cabinets</span>
+        </button>
+        <button onclick="switchTab('current-affairs')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200" id="tab-current-affairs">
+          <i data-lucide="newspaper" class="w-4 h-4 text-cyan-400"></i> <span data-lang-en="Current Affairs" data-lang-ml="കറന്റ് അഫയേഴ്സ്">Current Affairs</span>
+        </button>
+        <button onclick="switchTab('mock-test')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200" id="tab-mock-test">
+          <i data-lucide="timer" class="w-4 h-4 text-rose-400"></i> <span data-lang-en="Mock Test Center" data-lang-ml="മോക്ക് ടെസ്റ്റ് സെന്റർ">Mock Test</span>
+        </button>
+        <button onclick="switchTab('special')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200" id="tab-special">
+          <i data-lucide="landmark" class="w-4 h-4 text-purple-400"></i> <span data-lang-en="PSC & UPSC Hub" data-lang-ml="PSC & UPSC ഹബ്">PSC / UPSC</span>
+        </button>
+        <button onclick="switchTab('study-materials')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200" id="tab-study-materials">
+          <i data-lucide="book-open" class="w-4 h-4 text-emerald-400"></i> <span data-lang-en="Study Materials" data-lang-ml="പഠന സാമഗ്രികൾ">Study Materials</span>
+        </button>
+        <button onclick="switchTab('bookmarks')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200" id="tab-bookmarks">
+          <i data-lucide="bookmark" class="w-4 h-4 text-blue-400"></i> <span data-lang-en="Saved Queries" data-lang-ml="സേവ് ചെയ്തവ">Saved</span>
+        </button>
+        <button onclick="switchTab('review')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200" id="tab-review">
+          <i data-lucide="refresh-cw" class="w-4 h-4 text-pink-400"></i> <span data-lang-en="Wrong Review" data-lang-ml="തെറ്റായവ തിരുത്തുക">Wrong Review</span>
+        </button>
+        <button onclick="switchTab('profile')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200" id="tab-profile">
+          <i data-lucide="award" class="w-4 h-4 text-indigo-400"></i> <span data-lang-en="My Profile" data-lang-ml="എന്റെ പ്രൊഫൈൽ">My Profile</span>
+        </button>
+        <button onclick="switchTab('leaderboard')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200" id="tab-leaderboard">
+          <i data-lucide="trophy" class="w-4 h-4 text-yellow-500"></i> <span data-lang-en="Leaderboard" data-lang-ml="ലീഡർബോർഡ്">Leaderboard</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- CONTENT DISPLAY VIEWPORTS -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+      <!-- SEARCH RESULT CONTAINER -->
+      <div id="search-results-box" class="hidden bg-indigo-950/30 border border-indigo-500/30 p-5 rounded-3xl space-y-4 animate-fadeIn">
+        <div class="flex justify-between items-center border-b border-indigo-500/20 pb-3">
+          <h3 class="text-sm font-bold text-indigo-400 flex items-center gap-2"><i data-lucide="search" class="w-4 h-4"></i> Search Results</h3>
+          <button onclick="closeSearchResults()" class="text-xs text-indigo-300 hover:text-white">Clear Results ✕</button>
+        </div>
+        <div id="search-results-list" class="space-y-2 text-xs"></div>
+      </div>
+
+      <!-- VIEWPORT 1: HOME PANEL -->
+      <section id="viewport-home" class="viewport-section animate-fadeIn space-y-6">
+        <!-- Hero Welcome Panel -->
+        <div class="bg-gradient-to-r from-indigo-950 via-slate-900 to-cyan-950 border border-indigo-500/10 p-6 md:p-8 rounded-3xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+          <div class="space-y-4 z-10 max-w-xl">
+            <span class="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-3.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 w-max">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 animate-spin" style="animation-duration: 3s"></i>
+              <span data-lang-en="Academic Challenge System Live" data-lang-ml="പരീക്ഷാ ചലഞ്ച് സിസ്റ്റം ലൈവാണ്">Academic Challenge System Live</span>
+            </span>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-white leading-tight">
+              <span data-lang-en="Empower Your Competitive Career Path with" data-lang-ml="മത്സരപരീക്ഷകളിൽ നിങ്ങളുടെ വിജയം സുരക്ഷിതമാക്കൂ!">Empower Your Competitive Career Path with</span> <span class="bg-gradient-to-r from-indigo-300 to-cyan-400 bg-clip-text text-transparent">Knowix</span>
+            </h2>
+            <p class="text-xs text-slate-400 leading-relaxed" data-lang-en="Engage with specialized Kerala PSC modules, structured UPSC questions, dynamic daily flash quizzes, streak tracking, and customizable study materials built purely to optimize retention." data-lang-ml="കേരള പി.എസ്.സി സ്പെഷ്യൽ നോട്സുകൾ, യു.പി.എസ്.സി ചോദ്യങ്ങൾ, ഡെയ്‌ലി ക്വിസുകൾ, പഠന സാമഗ്രികൾ എന്നിവയിലൂടെ നിങ്ങളുടെ പരീക്ഷാ തയ്യാറെടുപ്പുകൾ കൂടുതൽ കരുത്തുറ്റതാക്കൂ.">
+              Engage with specialized Kerala PSC modules, structured UPSC questions, dynamic daily flash quizzes, streak tracking, and customizable study materials built purely to optimize retention.
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <button onclick="switchTab('daily')" class="bg-gradient-to-r from-indigo-500 to-cyan-500 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider hover:scale-[1.02] transition-all flex items-center gap-1.5">
+                <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span data-lang-en="Start Daily Quiz" data-lang-ml="ഡെയ്‌ലി ക്വിസ് തുടങ്ങുക">Start Daily Quiz</span>
+              </button>
+              <button onclick="switchTab('mock-test')" class="bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2.5 rounded-xl text-xs font-semibold hover:border-indigo-500/30 transition-all">
+                <span data-lang-en="Take Mock Test" data-lang-ml="മോക്ക് ടെസ്റ്റ് എഴുതുക">Take Mock Test</span>
+              </button>
+            </div>
+          </div>
+          <div class="w-full md:w-80 shrink-0 relative flex justify-center z-10">
+            <!-- Decorative Shield Logo -->
+            <svg viewBox="0 0 400 400" class="w-48 h-48 md:w-60 md:h-60 filter drop-shadow-[0_0_20px_rgba(99,102,241,0.25)]">
+              <polygon points="200,40 340,110 340,250 200,360 60,250 60,110" fill="none" stroke="#6366f1" stroke-width="4" />
+              <polygon points="200,60 320,120 320,240 200,335 80,240 80,120" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.6" />
+              <g transform="translate(145, 145) scale(1.1)">
+                <path d="M50 5 L90 25 L90 75 L50 95 L10 75 L10 25 Z" fill="#6366f1" opacity="0.2" />
+                <path d="M 38,30 L 38,70 M 38,50 L 60,30" stroke="#6366f1" stroke-width="4" stroke-linecap="round" />
+                <circle cx="60" cy="30" r="4" fill="#22d3ee" />
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- System Stats Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-slate-900 border border-slate-800/80 p-4.5 rounded-2xl flex items-center gap-3">
+            <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl"><i data-lucide="zap" class="w-5 h-5"></i></div>
+            <div>
+              <span id="stats-total-xp" class="text-lg font-extrabold block">0 XP</span>
+              <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider" data-lang-en="Total XP Accumulated" data-lang-ml="ആകെ നേടിയ XP">Total XP Earned</span>
+            </div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800/80 p-4.5 rounded-2xl flex items-center gap-3">
+            <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl"><i data-lucide="flame" class="w-5 h-5"></i></div>
+            <div>
+              <span id="stats-streak" class="text-lg font-extrabold block">1 Days</span>
+              <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider" data-lang-en="Current Streak" data-lang-ml="നിലവിലെ സ്ട്രീക്ക്">Current Streak</span>
+            </div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800/80 p-4.5 rounded-2xl flex items-center gap-3">
+            <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl"><i data-lucide="check-square" class="w-5 h-5"></i></div>
+            <div>
+              <span id="stats-accuracy" class="text-lg font-extrabold block">0%</span>
+              <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider" data-lang-en="Global Accuracy Rate" data-lang-ml="ആകെ കൃത്യതാനിരക്ക്">Overall Accuracy</span>
+            </div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800/80 p-4.5 rounded-2xl flex items-center gap-3">
+            <div class="p-3 bg-purple-500/10 text-purple-400 rounded-xl"><i data-lucide="award" class="w-5 h-5"></i></div>
+            <div>
+              <span id="stats-level" class="text-lg font-extrabold block">Level 1</span>
+              <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider" data-lang-en="Account Level Status" data-lang-ml="അക്കൗണ്ട് ലെവൽ">Platform Level</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two-Column Grid: Central Sections & Side widgets -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Main Area (Daily Flash + Countdowns + AI Quiz Generator) -->
+          <div class="lg:col-span-8 space-y-6">
+            
+            <!-- Quick Daily Facts Section -->
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+              <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+                <i data-lucide="lightbulb" class="w-5 h-5 text-amber-400"></i>
+                <h3 class="text-sm font-bold text-slate-200" data-lang-en="Daily Wisdom & Fact Board" data-lang-ml="ഇന്നത്തെ അറിവ് & പ്രത്യേകതകൾ">Daily Wisdom & Fact Board</h3>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/80 space-y-1">
+                  <span class="text-[10px] text-indigo-400 font-mono font-bold uppercase tracking-widest">Fact of the Day</span>
+                  <p class="text-xs text-slate-300 leading-relaxed" id="fact-of-the-day">In 1869, the Suez Canal was officially opened to navigation, significantly reducing transit time between Europe and Asia.</p>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/80 space-y-1">
+                  <span class="text-[10px] text-cyan-400 font-mono font-bold uppercase tracking-widest">Did You Know?</span>
+                  <p class="text-xs text-slate-300 leading-relaxed" id="did-you-know">Kerala's first renaissance leader recognized as the pioneer of social reform was Sree Narayana Guru, who established the Aruvippuram temple installation in 1888.</p>
+                </div>
+              </div>
+              <!-- Question of the Day -->
+              <div class="bg-indigo-950/20 border border-indigo-500/20 p-4 rounded-2xl space-y-2">
+                <div class="flex justify-between items-center text-[10px] text-indigo-400 font-bold uppercase tracking-wider">
+                  <span>Question of the Day</span>
+                  <span class="bg-indigo-500/20 px-2 py-0.5 rounded">Special 10 XP</span>
+                </div>
+                <p class="text-xs font-semibold text-slate-200" id="qotd-text">Which latitude divides Kerala into almost two equal halves?</p>
+                <div id="qotd-box" class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                  <button onclick="answerQotd(this, 'correct')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500 p-2 rounded-xl text-xs text-left text-slate-300">11° N Latitude</button>
+                  <button onclick="answerQotd(this, 'wrong')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500 p-2 rounded-xl text-xs text-left text-slate-300">8.5° N Latitude</button>
+                  <button onclick="answerQotd(this, 'wrong')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500 p-2 rounded-xl text-xs text-left text-slate-300">14° N Latitude</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Exam Countdown section -->
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+              <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+                <i data-lucide="alarm-clock" class="w-5 h-5 text-rose-400"></i>
+                <h3 class="text-sm font-bold text-slate-200" data-lang-en="Active Exam Countdowns" data-lang-ml="വരാനിരിക്കുന്ന പ്രധാന പരീക്ഷകൾ">Active Exam Countdowns</h3>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/80 flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-200">Kerala PSC LDC Exam</h4>
+                    <p class="text-[10px] text-slate-500">Estimated Schedule</p>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-base font-extrabold text-rose-400 block font-mono" id="countdown-psc">42 Days</span>
+                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Remaining</span>
+                  </div>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/80 flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-200">UPSC CSE Prelims</h4>
+                    <p class="text-[10px] text-slate-500">Scheduled Date</p>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-base font-extrabold text-cyan-400 block font-mono" id="countdown-upsc">345 Days</span>
+                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Remaining</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI Quiz Generator Interface -->
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+              <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+                <i data-lucide="cpu" class="w-5 h-5 text-indigo-400 animate-pulse"></i>
+                <h3 class="text-sm font-bold text-slate-200" data-lang-en="Smart AI Quiz & Revision Generator" data-lang-ml="സ്മാർട്ട് AI ക്വിസ് ജനറേറ്റർ">Smart AI Quiz Generator</h3>
+              </div>
+              <p class="text-xs text-slate-400">Generate a custom random mock session tailored immediately to improve your designated weak fields.</p>
+              <div class="flex flex-wrap gap-3">
+                <select id="ai-category-select" class="bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-xl p-2.5 outline-none focus:border-indigo-500">
+                  <option value="history">History (ഇന്ത്യൻ ചരിത്രം)</option>
+                  <option value="geography">Geography (ഭൂമിശാസ്ത്രം)</option>
+                  <option value="science">General Science (ശാസ്ത്രം)</option>
+                  <option value="polity">Polity / Constitution (ഭരണഘടന)</option>
+                  <option value="psc">Kerala PSC Special</option>
+                </select>
+                <button onclick="generateAIQuiz()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all flex items-center gap-2">
+                  <i data-lucide="zap" class="w-3.5 h-3.5"></i> <span data-lang-en="Assemble AI Quiz" data-lang-ml="AI ക്വിസ് നിർമ്മിക്കുക">Assemble AI Quiz</span>
+                </button>
+              </div>
+              <!-- Smart weak analysis summary recommendation -->
+              <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/80 flex items-center gap-3">
+                <div class="p-2 bg-yellow-500/10 text-yellow-400 rounded-xl"><i data-lucide="alert-triangle" class="w-4 h-4"></i></div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-300" data-lang-en="Smart Revision Recommendation" data-lang-ml="സ്മാർട്ട് റിവിഷൻ നിർദ്ദേശങ്ങൾ">Smart Revision Recommendation</h4>
+                  <p class="text-[11px] text-slate-500" id="revision-recommendation-text">Your performance in History and Flag studies is superb. Focus on general Science and Environment next!</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Side Widgets (Category Navigation + Achievements + Recent Affairs Highlights) -->
+          <div class="lg:col-span-4 space-y-6">
+            
+            <!-- Quick Topic Category Shortcuts -->
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+              <h3 class="text-sm font-bold text-slate-200" data-lang-en="Topic-wise Quiz Categories" data-lang-ml="വിഷയാടിസ്ഥാനത്തിലുള്ള ക്വിസുകൾ">Topic-wise Categories</h3>
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="startCategoryQuiz('history')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/40 p-3 rounded-xl text-left text-xs space-y-1 transition-all">
+                  <span class="block font-bold text-slate-300">History</span>
+                  <span class="text-[10px] text-indigo-400 font-mono">10 Qs</span>
+                </button>
+                <button onclick="startCategoryQuiz('geography')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/40 p-3 rounded-xl text-left text-xs space-y-1 transition-all">
+                  <span class="block font-bold text-slate-300">Geography</span>
+                  <span class="text-[10px] text-indigo-400 font-mono">10 Qs</span>
+                </button>
+                <button onclick="startCategoryQuiz('science')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/40 p-3 rounded-xl text-left text-xs space-y-1 transition-all">
+                  <span class="block font-bold text-slate-300">Science</span>
+                  <span class="text-[10px] text-indigo-400 font-mono">10 Qs</span>
+                </button>
+                <button onclick="startCategoryQuiz('polity')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/40 p-3 rounded-xl text-left text-xs space-y-1 transition-all">
+                  <span class="block font-bold text-slate-300">Polity</span>
+                  <span class="text-[10px] text-indigo-400 font-mono">10 Qs</span>
+                </button>
+                <button onclick="startCategoryQuiz('economics')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/40 p-3 rounded-xl text-left text-xs space-y-1 transition-all">
+                  <span class="block font-bold text-slate-300">Economics</span>
+                  <span class="text-[10px] text-indigo-400 font-mono">10 Qs</span>
+                </button>
+                <button onclick="startCategoryQuiz('environment')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/40 p-3 rounded-xl text-left text-xs space-y-1 transition-all">
+                  <span class="block font-bold text-slate-300">Environment</span>
+                  <span class="text-[10px] text-indigo-400 font-mono">10 Qs</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Recent Affairs Highlight Card -->
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-3.5">
+              <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="text-sm font-bold text-slate-200" data-lang-en="Current Affairs Bulletin" data-lang-ml="കറന്റ് അഫയേഴ്സ് വിവരങ്ങൾ">Current Affairs Highlights</h3>
+                <span class="text-[10px] text-indigo-400 font-mono">NEW</span>
+              </div>
+              <ul class="space-y-2.5 text-xs">
+                <li class="bg-slate-950/40 p-2 rounded-xl border border-slate-800 flex items-start gap-2">
+                  <span class="text-cyan-400 font-bold">•</span>
+                  <p class="text-slate-300 leading-normal">India signs crucial bilateral renewable energy agreement at the global climate council meet.</p>
+                </li>
+                <li class="bg-slate-950/40 p-2 rounded-xl border border-slate-800 flex items-start gap-2">
+                  <span class="text-cyan-400 font-bold">•</span>
+                  <p class="text-slate-300 leading-normal">Kerala State Literacy Mission launches new multilingual digital literacy outreach modules.</p>
+                </li>
+              </ul>
+              <button onclick="switchTab('current-affairs')" class="w-full text-center text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-all pt-1">
+                View Hub Archives →
+              </button>
+            </div>
+
+            <!-- Quick Progress Chart widget -->
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-3">
+              <h3 class="text-sm font-bold text-slate-200" data-lang-en="Subject Mastery Breakdown" data-lang-ml="വിഷയാടിസ്ഥാനത്തിലുള്ള കൃത്യത">Subject Mastery Breakdown</h3>
+              <div class="space-y-2.5 text-xs">
+                <div>
+                  <div class="flex justify-between text-slate-400 mb-1">
+                    <span>Flags & Heralds</span>
+                    <span id="mastery-flags">0%</span>
+                  </div>
+                  <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800"><div id="bar-mastery-flags" class="bg-indigo-500 h-full" style="width: 0%"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-slate-400 mb-1">
+                    <span>General GK</span>
+                    <span id="mastery-gk">0%</span>
+                  </div>
+                  <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800"><div id="bar-mastery-gk" class="bg-emerald-500 h-full" style="width: 0%"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-slate-400 mb-1">
+                    <span>Sports Arena</span>
+                    <span id="mastery-sports">0%</span>
+                  </div>
+                  <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800"><div id="bar-mastery-sports" class="bg-purple-500 h-full" style="width: 0%"></div></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEWPORT 2: DAILY QUIZ SYSTEM -->
+      <section id="viewport-daily" class="viewport-section hidden animate-fadeIn space-y-6">
+        <div class="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 relative shadow-2xl">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="calendar" class="text-amber-400"></i> Daily Challenge Arena</h2>
+              <p class="text-xs text-slate-400">10 daily fresh questions to challenge your core general knowledge metrics.</p>
+            </div>
+            <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full font-mono text-xs">Day Score: <span id="daily-current-score">0</span></span>
+          </div>
+
+          <!-- Quiz Content Card Container -->
+          <div id="daily-game-wrapper" class="space-y-6">
+            <!-- Progress Tracker -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs text-slate-400">
+                <span>Daily Tracker</span>
+                <span>Question <span id="daily-index">1</span> of 10</span>
+              </div>
+              <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-850">
+                <div id="daily-progress-bar" class="bg-amber-500 h-full transition-all duration-300" style="width: 10%"></div>
+              </div>
+            </div>
+
+            <!-- Question State -->
+            <div class="space-y-3">
+              <span class="text-[10px] text-amber-500 font-mono font-bold tracking-widest block uppercase">Query Entry</span>
+              <h3 id="daily-question-text" class="text-lg font-bold text-slate-100">Daily question load</h3>
+            </div>
+
+            <!-- Options Grid -->
+            <div id="daily-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Dynamically populated options -->
+            </div>
+
+            <!-- Feedbacks and explanations -->
+            <div id="daily-feedback-box" class="hidden p-4 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-1.5">
+              <span id="daily-feedback-status" class="text-xs font-bold font-mono">CORRECT CLASSIFICATION</span>
+              <p id="daily-explanation-text" class="text-xs text-slate-400 leading-normal">Explanation block text</p>
+            </div>
+
+            <!-- Action buttons -->
+            <div id="daily-action-row" class="hidden">
+              <button onclick="nextDailyQuestion()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+                Proceed to next Query <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Completed State -->
+          <div id="daily-completed-wrapper" class="hidden text-center py-6 space-y-6">
+            <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+              <i data-lucide="trophy" class="w-8 h-8"></i>
+            </div>
+            <div class="space-y-2">
+              <h3 class="text-xl font-bold text-white">Daily Ledger Concluded</h3>
+              <p class="text-xs text-slate-400">Your daily score has been calculated and updated in your master records. Streak safe!</p>
+            </div>
+            <div class="bg-slate-950 p-6 rounded-2xl border border-slate-850 inline-block w-full max-w-xs space-y-2">
+              <span class="text-[10px] text-slate-500 font-mono uppercase tracking-widest block">Day Session Performance</span>
+              <span class="text-4xl font-extrabold text-amber-400" id="daily-final-score">0 / 10</span>
+              <p class="text-[10px] text-slate-400">Total XP Gained: <span id="daily-xp-gained" class="text-indigo-400 font-bold">+0 XP</span></p>
+            </div>
+            <div class="flex justify-center gap-3">
+              <button onclick="switchTab('home')" class="bg-slate-950 border border-slate-800 text-slate-300 hover:text-white px-5 py-3 rounded-xl text-xs font-semibold transition-all">Back to Dashboard</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- VIEWPORT 3: THREE STUDY CABINETS -->
+      <section id="viewport-folders" class="viewport-section hidden animate-fadeIn space-y-6">
+        <!-- Landing view of Cabinets selection -->
+        <div id="cabinets-catalog" class="space-y-6">
+          <div class="text-center max-w-2xl mx-auto space-y-2">
+            <h2 class="text-2xl font-bold text-white">Classified Study Cabinets</h2>
+            <p class="text-xs text-slate-400">Explore premium comprehensive study cabinets, containing 25 structured syllabus items each. Perfect score logs secure rare elite status certificates.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <!-- Cabinet 1: Flags -->
+            <div onclick="startCabinet('flags')" class="bg-slate-900 border border-slate-800/80 hover:border-indigo-500/40 p-5 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col justify-between group">
+              <div class="space-y-2.5">
+                <div class="flex justify-between items-center">
+                  <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl"><i data-lucide="folder" class="w-5 h-5"></i></div>
+                  <span class="text-[10px] font-mono bg-slate-950 border border-slate-850 px-2.5 py-0.5 rounded-md text-slate-500">25 Queries</span>
+                </div>
+                <!-- Dynamic flag cabinet illustration -->
+                <div class="w-full h-24 rounded-xl bg-slate-950/70 border border-slate-850 p-2 flex items-center justify-center">
+                  <svg viewBox="0 0 100 100" class="w-16 h-16 fill-none stroke-indigo-400 stroke-2">
+                    <line x1="20" y1="10" x2="20" y2="90" stroke="#94a3b8" stroke-width="4" />
+                    <circle cx="20" cy="8" r="4" fill="#fbbf24" />
+                    <path d="M 20,15 C 40,5 50,25 70,15 C 90,5 100,25 100,15 L 100,55 C 80,65 70,45 50,55 C 30,65 20,45 20,55 Z" fill="#4f46e5" opacity="0.8" />
+                  </svg>
+                </div>
+                <h3 class="text-sm font-bold text-slate-200 group-hover:text-indigo-400 transition-colors">Cabinet I: Flag Heraldry</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">Analyze highly detailed vexillological emblems from obscure or minor island nations and protectorates across the world.</p>
+              </div>
+              <div class="border-t border-slate-850 mt-4 pt-3 text-xs text-slate-500 flex justify-between items-center">
+                <span>Difficult / Obscure</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </div>
+            </div>
+
+            <!-- Cabinet 2: GK -->
+            <div onclick="startCabinet('gk')" class="bg-slate-900 border border-slate-800/80 hover:border-emerald-500/40 p-5 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col justify-between group">
+              <div class="space-y-2.5">
+                <div class="flex justify-between items-center">
+                  <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl"><i data-lucide="folder" class="w-5 h-5"></i></div>
+                  <span class="text-[10px] font-mono bg-slate-950 border border-slate-850 px-2.5 py-0.5 rounded-md text-slate-500">25 Queries</span>
+                </div>
+                <!-- Dynamic GK globe illustration -->
+                <div class="w-full h-24 rounded-xl bg-slate-950/70 border border-slate-850 p-2 flex items-center justify-center">
+                  <svg viewBox="0 0 100 100" class="w-16 h-16 fill-none stroke-emerald-400 stroke-2">
+                    <circle cx="50" cy="50" r="30" stroke="#059669" />
+                    <ellipse cx="50" cy="50" rx="30" ry="10" stroke="#059669" />
+                    <ellipse cx="50" cy="50" rx="10" ry="30" stroke="#059669" />
+                  </svg>
+                </div>
+                <h3 class="text-sm font-bold text-slate-200 group-hover:text-emerald-400 transition-colors">Cabinet II: Global GK</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">Journey through dry-land geological structures, historically significant canals, world capitals, and demographic mysteries.</p>
+              </div>
+              <div class="border-t border-slate-850 mt-4 pt-3 text-xs text-slate-500 flex justify-between items-center">
+                <span>Medium Difficulty</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </div>
+            </div>
+
+            <!-- Cabinet 3: Sports -->
+            <div onclick="startCabinet('sports')" class="bg-slate-900 border border-slate-800/80 hover:border-indigo-500/40 p-5 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col justify-between group">
+              <div class="space-y-2.5">
+                <div class="flex justify-between items-center">
+                  <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl"><i data-lucide="folder" class="w-5 h-5"></i></div>
+                  <span class="text-[10px] font-mono bg-slate-950 border border-slate-850 px-2.5 py-0.5 rounded-md text-slate-500">25 Queries</span>
+                </div>
+                <!-- Dynamic Sports soccer illustration -->
+                <div class="w-full h-24 rounded-xl bg-slate-950/70 border border-slate-850 p-2 flex items-center justify-center">
+                  <svg viewBox="0 0 100 100" class="w-16 h-16 fill-none stroke-indigo-400 stroke-2">
+                    <circle cx="50" cy="50" r="30" stroke="#1e293b" stroke-width="3" fill="#ffffff" />
+                    <polygon points="50,40 58,47 55,57 45,57 42,47" fill="#1e293b" />
+                    <line x1="50" y1="40" x2="50" y2="20" stroke="#1e293b" stroke-width="2" />
+                    <line x1="58" y1="47" x2="75" y2="35" stroke="#1e293b" stroke-width="2" />
+                    <line x1="55" y1="57" x2="68" y2="75" stroke="#1e293b" stroke-width="2" />
+                  </svg>
+                </div>
+                <h3 class="text-sm font-bold text-slate-200 group-hover:text-indigo-400 transition-colors">Cabinet III: Sports Arena</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">A high-octane sports deck with 80% weight on football (World Cup history, legendary clubs, iconic players) and 20% on others.</p>
+              </div>
+              <div class="border-t border-slate-850 mt-4 pt-3 text-xs text-slate-500 flex justify-between items-center">
+                <span>Medium to Hard</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gameplay Dashboard -->
+        <div id="cabinet-gameplay" class="hidden max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <h2 class="text-sm font-extrabold uppercase font-mono tracking-wider text-indigo-400 flex items-center gap-2" id="cabinet-game-title">Cabinet Gameplay</h2>
+            <button onclick="exitCabinet()" class="text-xs text-slate-500 hover:text-white">Exit Cabinet</button>
+          </div>
+
+          <div class="space-y-6">
+            <!-- Progress -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs text-slate-400">
+                <span>Cabinet Progress</span>
+                <span>Question <span id="cabinet-index">1</span> of 25</span>
+              </div>
+              <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-850">
+                <div id="cabinet-progress-bar" class="bg-indigo-500 h-full transition-all duration-300" style="width: 4%"></div>
+              </div>
+            </div>
+
+            <!-- Flag preview window for Flag Study -->
+            <div id="cabinet-flag-display" class="hidden bg-slate-950 p-4 rounded-2xl border border-slate-850 flex justify-center">
+              <!-- Inline SVGs rendered dynamically -->
+            </div>
+
+            <!-- Question and Bookmark -->
+            <div class="flex justify-between items-start gap-4">
+              <div class="space-y-1">
+                <span class="text-[10px] text-slate-500 font-mono font-bold tracking-widest block">QUERY ENTRY</span>
+                <h3 id="cabinet-question-text" class="text-base font-bold text-white">Question statement loaded here</h3>
+              </div>
+              <button onclick="toggleBookmarkCurrentQuestion()" class="p-2 bg-slate-950 border border-slate-800 rounded-xl hover:border-indigo-500 text-slate-500 hover:text-indigo-400 transition-all" title="Save / Bookmark Query">
+                <i data-lucide="bookmark" id="cabinet-bookmark-icon" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <!-- Options Grid -->
+            <div id="cabinet-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Dynamically populated options -->
+            </div>
+
+            <!-- Wrong/Correct Answer Explanations -->
+            <div id="cabinet-feedback-box" class="hidden p-4 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-1">
+              <span id="cabinet-feedback-status" class="text-xs font-bold font-mono text-emerald-400">CORRECT CLASSIFICATION</span>
+              <p id="cabinet-explanation-text" class="text-xs text-slate-400 leading-relaxed">Detailed explanation text</p>
+            </div>
+
+            <!-- Actions Row -->
+            <div id="cabinet-action-row" class="hidden">
+              <button onclick="nextCabinetQuestion()" class="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-slate-950 font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+                Proceed to next Query <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cabinet Complete Report -->
+        <div id="cabinet-completed" class="hidden max-w-xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 text-center">
+          <div class="w-16 h-16 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto shadow-2xl">
+            <i data-lucide="award" class="w-8 h-8"></i>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-2xl font-bold text-white">Cabinet Ledger Processed</h3>
+            <p class="text-xs text-slate-400">Your final score sheet has been submitted to the local database core.</p>
+          </div>
+          <div class="bg-slate-950 p-6 rounded-2xl border border-slate-850 space-y-2">
+            <span class="text-[10px] text-slate-500 font-mono uppercase tracking-widest block">Final Score Metrics</span>
+            <span class="text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-200 to-cyan-400 bg-clip-text" id="cabinet-final-score">0 / 25</span>
+            <p class="text-xs text-slate-400">XP Gained: <span class="text-emerald-400 font-bold" id="cabinet-xp-gained">+0 XP</span></p>
+          </div>
+          <div class="flex gap-3 justify-center">
+            <button onclick="exitCabinet()" class="bg-slate-950 border border-slate-800 text-slate-300 hover:text-white px-5 py-3 rounded-xl text-xs font-semibold transition-all">Catalog Deck</button>
+            <button onclick="restartCabinetGame()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition-all">Restart game</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEWPORT 4: CURRENT AFFAIRS HUB -->
+      <section id="viewport-current-affairs" class="viewport-section hidden animate-fadeIn space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="newspaper" class="text-cyan-400"></i> Current Affairs Hub</h2>
+            <p class="text-xs text-slate-400">Stay updated with structural national and international news affairs designed for UPSC and PSC.</p>
+          </div>
+          <button onclick="downloadCurrentAffairsPDF()" class="bg-slate-900 border border-slate-800 hover:border-indigo-500 px-4 py-2.5 rounded-xl text-xs font-bold text-indigo-400 flex items-center gap-2 transition-all">
+            <i data-lucide="download" class="w-4 h-4"></i> Download PDF Digest
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Archives section (Today, Weekly, Monthly) -->
+          <div class="lg:col-span-8 space-y-4">
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+              <div class="flex gap-2 border-b border-slate-800 pb-3">
+                <button onclick="switchAffairsTab('today')" id="btn-affairs-today" class="bg-indigo-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all">Today's Affairs</button>
+                <button onclick="switchAffairsTab('weekly')" id="btn-affairs-weekly" class="text-slate-400 hover:text-slate-200 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all">Weekly Summary</button>
+                <button onclick="switchAffairsTab('monthly')" id="btn-affairs-monthly" class="text-slate-400 hover:text-slate-200 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all">Monthly Digest</button>
+              </div>
+
+              <div id="affairs-content" class="space-y-4 text-xs leading-relaxed text-slate-300">
+                <!-- Dynamically populated current affairs lists -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Affairs Mini Quiz -->
+          <div class="lg:col-span-4 bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4 shadow-xl">
+            <div class="border-b border-slate-800 pb-2">
+              <span class="text-[10px] text-cyan-400 font-mono font-bold uppercase tracking-widest block">Daily Capsule</span>
+              <h3 class="text-sm font-bold text-white">Current Affairs Mini-Quiz</h3>
+            </div>
+            <div class="space-y-3" id="affairs-quiz-box">
+              <p class="text-xs text-slate-300" id="affairs-quiz-q">Which nation officially hosted the global 2026 Climate Action Council summit?</p>
+              <div class="space-y-2" id="affairs-quiz-options">
+                <button onclick="answerAffairsQuiz(this, 'correct')" class="w-full text-left p-3 bg-slate-950 border border-slate-800 hover:border-indigo-500 rounded-xl text-xs text-slate-300">India</button>
+                <button onclick="answerAffairsQuiz(this, 'wrong')" class="w-full text-left p-3 bg-slate-950 border border-slate-800 hover:border-indigo-500 rounded-xl text-xs text-slate-300">Germany</button>
+                <button onclick="answerAffairsQuiz(this, 'wrong')" class="w-full text-left p-3 bg-slate-950 border border-slate-800 hover:border-indigo-500 rounded-xl text-xs text-slate-300">Japan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEWPORT 5: MOCK TEST CENTER -->
+      <section id="viewport-mock-test" class="viewport-section hidden animate-fadeIn space-y-6">
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+          <h2 class="text-2xl font-bold text-white flex items-center justify-center gap-2"><i data-lucide="timer" class="text-rose-500"></i> Academy Mock Test Center</h2>
+          <p class="text-xs text-slate-400">Practice under authentic exam pressure conditions. Time-limited evaluations with real-time automatic grading indexes.</p>
+        </div>
+
+        <!-- Setup Screen -->
+        <div id="mock-setup-box" class="max-w-md mx-auto bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-3xl space-y-6 shadow-2xl">
+          <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider border-b border-slate-800 pb-3">Test Configuration</h3>
+          <div class="space-y-4 text-xs">
+            <div class="space-y-1.5">
+              <label class="font-bold text-slate-400 block">Select Exam Pattern</label>
+              <select id="mock-exam-pattern" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 outline-none focus:border-indigo-500">
+                <option value="kerala_psc">Kerala PSC LDC Pattern (25 Qs - 15 mins)</option>
+                <option value="upsc_csat">UPSC General Studies Mock (25 Qs - 15 mins)</option>
+                <option value="all_round">Full General Knowledge Marathon (50 Qs - 30 mins)</option>
+              </select>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-850 text-slate-400 leading-normal">
+              <strong>Rules:</strong> Once began, the stopwatch timer cannot be paused. Refreshing session logs automatic disqualification. Score indices will be permanently updated.
+            </div>
+            <button onclick="startMockExam()" class="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-slate-950 font-extrabold py-3.5 rounded-xl uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i> Start Mock Examination
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Test screen -->
+        <div id="mock-exam-box" class="hidden max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div>
+              <span id="mock-badge-title" class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2.5 py-0.5 rounded-md font-mono text-[10px] uppercase font-bold">PSC LDC Pattern</span>
+              <h3 class="text-sm font-bold text-slate-200 mt-1">Syllabus Evaluation</h3>
+            </div>
+            <div class="bg-slate-950 border border-slate-850 px-4 py-2.5 rounded-xl text-center">
+              <span class="text-[9px] text-slate-500 uppercase tracking-wider font-bold block">Remaining Duration</span>
+              <span class="text-base font-extrabold text-rose-500 font-mono" id="mock-stopwatch">15:00</span>
+            </div>
+          </div>
+
+          <!-- Active Question area -->
+          <div class="space-y-6">
+            <div class="flex justify-between items-center text-xs text-slate-400">
+              <span>Question List</span>
+              <span><span id="mock-current-idx-lbl">1</span> of <span id="mock-total-idx-lbl">25</span></span>
+            </div>
+            <div class="space-y-3">
+              <h4 class="text-base font-bold text-white" id="mock-question-text">Question loaded</h4>
+              <div id="mock-options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- Option buttons dynamically generated -->
+              </div>
+            </div>
+
+            <!-- Question navigation -->
+            <div class="flex justify-between pt-4 border-t border-slate-850">
+              <button id="mock-btn-prev" onclick="navigateMockQuestion(-1)" class="bg-slate-950 border border-slate-800 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs transition-all">← Previous</button>
+              <button onclick="terminateMockExamEarly()" class="bg-rose-950/40 border border-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-slate-950 px-4 py-2 rounded-xl text-xs transition-all font-bold">Submit Early</button>
+              <button id="mock-btn-next" onclick="navigateMockQuestion(1)" class="bg-indigo-600 text-white hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs transition-all">Next →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report screen -->
+        <div id="mock-report-box" class="hidden max-w-xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 text-center shadow-2xl">
+          <div class="w-16 h-16 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto shadow-2xl">
+            <i data-lucide="file-text" class="w-8 h-8"></i>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-2xl font-bold text-white">Evaluation Score Sheet</h3>
+            <p class="text-xs text-slate-400">Performance indexes are updated inside the central database ledger.</p>
+          </div>
+          <div class="bg-slate-950 p-6 rounded-2xl border border-slate-850 grid grid-cols-2 gap-4">
+            <div class="border-r border-slate-850">
+              <span class="text-[9px] text-slate-500 font-mono block uppercase">Total Questions</span>
+              <span class="text-2xl font-extrabold text-slate-200" id="mock-score-total">25</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-500 font-mono block uppercase">Correct Entries</span>
+              <span class="text-2xl font-extrabold text-emerald-400" id="mock-score-correct">18</span>
+            </div>
+          </div>
+          <div class="flex gap-3 justify-center">
+            <button onclick="switchTab('home')" class="bg-slate-950 border border-slate-800 text-slate-300 hover:text-white px-5 py-3 rounded-xl text-xs font-semibold transition-all">Home Panel</button>
+            <button onclick="switchTab('profile')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition-all">My Profile stats</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEWPORT 6: PSC & UPSC HUB -->
+      <section id="viewport-special" class="viewport-section hidden animate-fadeIn space-y-6">
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+          <h2 class="text-2xl font-bold text-white"><i data-lucide="landmark" class="text-purple-400"></i> PSC & UPSC Elite Special</h2>
+          <p class="text-xs text-slate-400">Access specialized curriculum structures prepared for state PSC and union UPSC exam patterns.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Kerala PSC Hub -->
+          <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+            <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
+              <h3 class="text-sm font-bold text-purple-400 flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4"></i> Kerala PSC Corridor</h3>
+              <span class="text-[9px] bg-purple-500/10 text-purple-400 px-2.5 py-0.5 rounded-full font-bold">Syllabus</span>
+            </div>
+            <p class="text-xs text-slate-400">Covers Kerala History, Kerala Renaissance Leaders, regional geography, and specialized local board questions.</p>
+            <div class="space-y-2 text-xs">
+              <button onclick="startCategoryQuiz('psc_history')" class="w-full bg-slate-950 border border-slate-850 hover:border-purple-500/30 p-3.5 rounded-xl text-left flex justify-between items-center transition-all">
+                <span>Kerala Renaissance Leaders Quiz (കേരള നവോത്ഥാനം)</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <button onclick="startCategoryQuiz('psc_geo')" class="w-full bg-slate-950 border border-slate-850 hover:border-purple-500/30 p-3.5 rounded-xl text-left flex justify-between items-center transition-all">
+                <span>Kerala Regional Geography Quiz (കേരള ഭൂമിശാസ്ത്രം)</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- UPSC GS Arena -->
+          <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+            <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
+              <h3 class="text-sm font-bold text-cyan-400 flex items-center gap-1.5"><i data-lucide="globe" class="w-4 h-4"></i> UPSC GS Sector</h3>
+              <span class="text-[9px] bg-cyan-500/10 text-cyan-400 px-2.5 py-0.5 rounded-full font-bold">GS Papers</span>
+            </div>
+            <p class="text-xs text-slate-400">Covers advanced Polity, Economics structures, International Relations, and environment conservation frameworks.</p>
+            <div class="space-y-2 text-xs">
+              <button onclick="startCategoryQuiz('upsc_polity')" class="w-full bg-slate-950 border border-slate-850 hover:border-cyan-500/30 p-3.5 rounded-xl text-left flex justify-between items-center transition-all">
+                <span>UPSC Indian Constitution Practice Questions</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+              </button>
+              <button onclick="startCategoryQuiz('upsc_eco')" class="w-full bg-slate-950 border border-slate-850 hover:border-cyan-500/30 p-3.5 rounded-xl text-left flex justify-between items-center transition-all">
+                <span>Advanced Macroeconomics & Budgetary Concepts</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEWPORT 7: STUDY MATERIALS -->
+      <section id="viewport-study-materials" class="viewport-section hidden animate-fadeIn space-y-6">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="book-open" class="text-emerald-400"></i> Study Materials & Notes</h2>
+            <p class="text-xs text-slate-400">Review micro-notes, structural tips, and important syllabus briefs compiled for easy learning.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-3">
+            <h3 class="text-sm font-bold text-slate-200">History Notes (ചരിത്രം)</h3>
+            <ul class="space-y-2 text-xs text-slate-400 leading-normal">
+              <li class="bg-slate-950 p-3 rounded-xl border border-slate-850"><strong>Indus Valley:</strong> Major sites include Harappa, Mohenjo-daro, and Lothal (famous dockyard).</li>
+              <li class="bg-slate-950 p-3 rounded-xl border border-slate-850"><strong>Maurya Dynasty:</strong> Ashoka converted to Buddhism post-Kalinga War in 261 BC.</li>
+            </ul>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-3">
+            <h3 class="text-sm font-bold text-slate-200">Polity & Constitution (ഭരണഘടന)</h3>
+            <ul class="space-y-2 text-xs text-slate-400 leading-normal">
+              <li class="bg-slate-950 p-3 rounded-xl border border-slate-850"><strong>Fundamental Rights:</strong> Part III of Indian Constitution (Articles 12-35).</li>
+              <li class="bg-slate-950 p-3 rounded-xl border border-slate-850"><strong>Directive Principles:</strong> Borrowed from Irish Constitution (Part IV).</li>
+            </ul>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-3">
+            <h3 class="text-sm font-bold text-slate-200">Kerala Renaissance (നവോത്ഥാനം)</h3>
+            <ul class="space-y-2 text-xs text-slate-400 leading-normal">
+              <li class="bg-slate-950 p-3 rounded-xl border border-slate-850"><strong>Sree Narayana Guru:</strong> Founded SNDP in 1903. Declared "One Caste, One Religion, One God".</li>
+              <li class="bg-slate-950 p-3 rounded-xl border border-slate-850"><strong>Ayyankali:</strong> Established Sadhu Jana Paripalana Sangham in 1907.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEWPORT 8: BOOKMARKED/SAVED QUERIES -->
+      <section id="viewport-bookmarks" class="viewport-section hidden animate-fadeIn space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="bookmark" class="text-blue-400"></i> Saved / Bookmarked Queries</h2>
+          <p class="text-xs text-slate-400">Review your compiled collection of complex questions saved during evaluation sessions.</p>
+        </div>
+
+        <div id="bookmarks-catalog" class="space-y-3">
+          <!-- Bookmark items generated dynamically -->
+        </div>
+      </section>
+
+      <!-- VIEWPORT 9: WRONG ANSWER REVIEWS -->
+      <section id="viewport-review" class="viewport-section hidden animate-fadeIn space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="refresh-cw" class="text-pink-400"></i> Weak Areas / Wrong Answers review</h2>
+          <p class="text-xs text-slate-400">Re-examine historical questions answered incorrectly in previous evaluations to master core logic.</p>
+        </div>
+
+        <div id="wrong-answers-catalog" class="space-y-3">
+          <!-- Incorrectly answered questions displayed dynamically -->
+        </div>
+      </section>
+
+      <!-- VIEWPORT 10: USER PROFILE DASHBOARD -->
+      <section id="viewport-profile" class="viewport-section hidden animate-fadeIn space-y-6">
+        <div class="bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-3xl space-y-6 shadow-2xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-8 text-slate-800 opacity-20 pointer-events-none"><i data-lucide="user" class="w-48 h-48"></i></div>
+          
+          <div class="flex items-center gap-4 border-b border-slate-800 pb-5 z-10 relative">
+            <div class="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-cyan-400 text-slate-950 rounded-2xl flex items-center justify-center font-extrabold text-2xl" id="profile-letter-avatar">U</div>
+            <div>
+              <h2 class="text-xl font-bold text-white" id="profile-full-name">User Account</h2>
+              <p class="text-xs text-slate-400" id="profile-study-focus">Focus: Kerala PSC Examination</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 z-10 relative">
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850">
+              <span class="text-[9px] text-slate-500 uppercase font-bold block">Quizzes Attempted</span>
+              <span class="text-xl font-extrabold text-slate-200" id="profile-stat-attempted">0</span>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850">
+              <span class="text-[9px] text-slate-500 uppercase font-bold block">Correct Answers</span>
+              <span class="text-xl font-extrabold text-emerald-400" id="profile-stat-correct">0</span>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850">
+              <span class="text-[9px] text-slate-500 uppercase font-bold block">Accuracy Rating</span>
+              <span class="text-xl font-extrabold text-indigo-400" id="profile-stat-accuracy">0%</span>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850">
+              <span class="text-[9px] text-slate-500 uppercase font-bold block">Platform Level</span>
+              <span class="text-xl font-extrabold text-purple-400" id="profile-stat-level">Lvl 1</span>
+            </div>
+          </div>
+
+          <!-- Achievements Ledger -->
+          <div class="space-y-3 z-10 relative">
+            <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2"><i data-lucide="award" class="text-amber-400"></i> Earned Academy Achievements</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="achievements-catalog-grid">
+              <!-- Dynamically generated achievement badges -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEWPORT 11: LEADERBOARD -->
+      <section id="viewport-leaderboard" class="viewport-section hidden animate-fadeIn space-y-6">
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+          <h2 class="text-2xl font-bold text-white flex items-center justify-center gap-2"><i data-lucide="trophy" class="text-yellow-500 animate-bounce"></i> Global Rankings</h2>
+          <p class="text-xs text-slate-400">See how your current score metrics rank against other active competitive aspirants across the region.</p>
+        </div>
+
+        <div class="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+          <div class="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center text-xs">
+            <span class="font-mono text-slate-400">Active aspirants ledger list</span>
+            <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded text-[10px] uppercase font-bold">Master Leaderboard</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="bg-slate-950/40 border-b border-slate-850 text-slate-400 font-bold">
+                  <th class="p-4">Rank</th>
+                  <th class="p-4">Name</th>
+                  <th class="p-4">XP Score</th>
+                  <th class="p-4">Streak Status</th>
+                  <th class="p-4">Primary Exam Focus</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-table-rows" class="divide-y divide-slate-850">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEWPORT 12: OWNER VAULT (PASSWORD PROTECTED LOG) -->
+      <section id="viewport-owner-vault" class="viewport-section hidden animate-fadeIn space-y-6">
+        <div class="flex justify-between items-center bg-slate-900 p-4.5 rounded-2xl border border-slate-800/80">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="database" class="text-indigo-400"></i> Platform Registrations Log</h2>
+            <p class="text-xs text-slate-400">Manage, review, and delete registrations inside local databases.</p>
+          </div>
+          <button onclick="switchTab('home')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 px-3.5 py-1.5 rounded-xl text-xs text-slate-300">Close Ledger</button>
+        </div>
+
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-3xl overflow-hidden shadow-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 font-bold">
+                  <th class="p-4">Time</th>
+                  <th class="p-4">Name</th>
+                  <th class="p-4">Phone Number</th>
+                  <th class="p-4">WhatsApp No</th>
+                  <th class="p-4">Location / Place</th>
+                  <th class="p-4">Goal Path</th>
+                  <th class="p-4 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="owner-vault-table-rows" class="divide-y divide-slate-850">
+                <!-- Registrations generated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- SYSTEM FOOTER -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-600 space-y-2">
+      <p>© 2026 Knowix Platforms. Engineered for geography, vexillology, and sports trivia mastery.</p>
+      <div class="flex justify-center gap-4 text-[10px] text-slate-500">
+        <span>Security Core Online</span>
+        <span>•</span>
+        <span>Database Engine v2.5 (LocalStorage)</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- PASSWORD VERIFICATION POPUP FOR OWNER VAULT -->
+  <div id="owner-login-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
+    <div class="bg-slate-900 border border-slate-800 max-w-sm w-full p-6 rounded-3xl space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-mono font-bold text-slate-400 flex items-center gap-1.5"><i data-lucide="lock" class="text-indigo-400"></i> Platform Security Access</span>
+        <button onclick="closeOwnerLoginModal()" class="text-slate-500 hover:text-slate-300 text-xs">✕</button>
+      </div>
+      <p class="text-xs text-slate-400">Enter secure key parameter <code class="bg-slate-950 px-1.5 py-0.5 rounded text-indigo-400">474474</code> to unlock database records view.</p>
+      <form onsubmit="handleOwnerVaultAuth(event)" class="space-y-3">
+        <input type="password" id="owner-password-field" placeholder="🔑 Access Token Code" required class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-xs text-slate-200 outline-none focus:border-indigo-500" />
+        <p id="owner-auth-error" class="hidden text-[10px] text-rose-400 font-semibold"></p>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all">Verify Security Key</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- INLINE DATA AND GAME CONTROLLER SCRIPTS -->
+  <script>
+    // PRE-POPULATED CORE DATA ARCHIVES
+    const ARCHIVES_FLAG_QUESTIONS = [
+      { id: 1, flagId: "seychelles", question: "Identify the country associated with this beautifully vibrant diagonal ray flag design.", options: ["Seychelles", "Mauritius", "Cabo Verde", "Maldives"], correct: "Seychelles", exp: "The Seychelles flag features five diagonal bands representing sky, sun, people, social justice, and the environment." },
+      { id: 2, flagId: "st_lucia", question: "Which Caribbean island nation's flag portrays the iconic Twin Pitons as rising volcanic cones?", options: ["Barbados", "Grenada", "Saint Lucia", "Dominica"], correct: "Saint Lucia", exp: "Saint Lucia's flag features stylized triangles representing the world-famous Pitons rising out of the blue ocean." },
+      { id: 3, flagId: "palau", question: "Which Micronesian archipelago displays a golden full moon on a tranquil sky-blue field?", options: ["Palau", "Nauru", "Tuvalu", "Fiji"], correct: "Palau", exp: "Palau's flag features a yellow circle representing the full moon, which holds great significance for agricultural harvest and culture." },
+      { id: 4, flagId: "antigua_barbuda", question: "Which dual-island nation's flag showcases a rising sun over black, blue, and white background panels?", options: ["Bahamas", "Antigua and Barbuda", "Trinidad & Tobago", "Cabo Verde"], correct: "Antigua and Barbuda", exp: "The golden sun of Antigua and Barbuda represents the dawning of a new era, while red symbolizes dynamism." },
+      { id: 5, flagId: "cabo_verde", question: "Identify the country whose flag features a circle of ten gold stars representing its primary volcanic islands.", options: ["Cabo Verde", "Samoa", "Comoros", "Malta"], correct: "Cabo Verde", exp: "Cabo Verde's ten gold stars represent the main islands of the archipelago, floating on the deep blue of the Atlantic." },
+      { id: 6, flagId: "nauru", question: "Which island nation's flag depicts a yellow equator line with a 12-pointed star positioned just below it?", options: ["Tuvalu", "Nauru", "Kiribati", "Palau"], correct: "Nauru", exp: "The star shows Nauru's geographical location just 1 degree south of the equator, with 12 points representing its original tribes." },
+      { id: 7, flagId: "marshall_islands", question: "Which nation's flag is recognized by widening orange and white diagonal rays rising from the bottom left?", options: ["Marshall Islands", "Solomon Islands", "Vanuatu", "Samoa"], correct: "Marshall Islands", exp: "The orange ray represents courage and wealth, white represents peace, and the star represents the Christian cross." },
+      { id: 8, flagId: "solomon_islands", question: "Which South Pacific archipelago's flag is divided diagonally by a yellow stripe with five white stars in the canton?", options: ["Vanuatu", "Fiji", "Solomon Islands", "Papua New Guinea"], correct: "Solomon Islands", exp: "The five stars represent the five original administrative districts of the Solomon Islands." },
+      { id: 9, flagId: "micronesia", question: "Which country has four white stars representing its constituent island states (YAP, Chuuk, Pohnpei, Kosrae)?", options: ["Micronesia", "Palau", "Marshall Islands", "Nauru"], correct: "Micronesia", exp: "The four stars represent the four states of the Federated States of Micronesia on a light blue Pacific ocean background." },
+      { id: 10, flagId: "liechtenstein", question: "Which tiny European principality features a gold ducal crown in the canton of its blue and red flag?", options: ["Andorra", "Monaco", "Luxembourg", "Liechtenstein"], correct: "Liechtenstein", exp: "The crown was added in 1937 after Liechtenstein realized at the 1936 Olympics that their flag was identical to Haiti's." },
+      { id: 11, flagId: "grenada", question: "Which Caribbean nation displays a nutmeg clove on its flag, flanked by six stars on a rich red border?", options: ["Grenada", "Saint Vincent", "Saint Lucia", "Dominica"], correct: "Grenada", exp: "Known as the 'Spice Isle', Grenada is one of the world's largest producers of nutmeg, which is proudly featured on its flag." },
+      { id: 12, flagId: "eswatini", question: "Which landlocked African kingdom displays a black and white Nguni military shield on its state flag?", options: ["Lesotho", "Eswatini", "Botswana", "Rwanda"], correct: "Eswatini", exp: "The shield represents protection, while the blue, yellow, and red colors signify peace, resources, and past struggles." },
+      { id: 13, flagId: "brunei", question: "Which Southeast Asian sultanate features a red state emblem centered over diagonal black and white stripes?", options: ["Brunei", "Cambodia", "Timor-Leste", "Laos"], correct: "Brunei", exp: "The flag of Brunei has been used since 1959 when the country was a British protectorate." },
+      { id: 14, flagId: "djibouti", question: "Identify this East African nation's flag which has a white triangle on the hoist with a red star.", options: ["Eritrea", "Somalia", "Djibouti", "Yemen"], correct: "Djibouti", exp: "The white triangle represents peace, light blue represents the sky/sea, green represents earth, and red star symbolizes unity." },
+      { id: 15, flagId: "st_vincent", question: "Which Caribbean island features three green diamonds forming a 'V' shape on its gold central stripe?", options: ["Saint Vincent", "Grenada", "Saint Lucia", "Barbados"], correct: "Saint Vincent", exp: "The three diamonds represent the Grenadines islands and form a 'V' for Saint Vincent." },
+      { id: 16, flagId: "comoros", question: "Which island nation features four horizontal bands of yellow, white, red, and blue, with a green triangle?", options: ["Comoros", "Mauritius", "Cabo Verde", "Seychelles"], correct: "Comoros", exp: "The four colors and four stars represent the four main islands of the Comoros archipelago." },
+      { id: 17, flagId: "eritrea", question: "Which East African nation has a flag with a gold olive branch wreath on a red triangle?", options: ["Ethiopia", "Eritrea", "Sudan", "Djibouti"], correct: "Eritrea", exp: "The olive branch wreath is adapted from the UN-designed flag used in 1952 to honor Eritrea's autonomy." },
+      { id: 18, flagId: "tuvalu", question: "Which South Pacific nation's flag is light blue with nine yellow stars representing its low-lying reef islands?", options: ["Tuvalu", "Tonga", "Samoa", "Vanuatu"], correct: "Tuvalu", exp: "The name 'Tuvalu' means 'Eight Together', although there are nine reef islands represented by stars." },
+      { id: 19, flagId: "kiribati", question: "Which island country features a frigatebird flying over a rising gold sun and wavy blue and white ocean lines?", options: ["Kiribati", "Nauru", "Maldives", "Tuvalu"], correct: "Kiribati", exp: "The wavy lines represent the vast Pacific ocean, and the rising sun represents the equator passing through the islands." },
+      { id: 20, flagId: "suriname", question: "Which South American nation features a large gold star on a red center band surrounded by white and green?", options: ["Guyana", "Suriname", "Uruguay", "Paraguay"], correct: "Suriname", exp: "The gold star symbolizes unity, hope, and the bright future of Suriname's diverse ethnic groups." },
+      { id: 21, flagId: "bhutan", question: "Which Himalayan kingdom features a diagonal division of yellow and orange with a dragon running through?", options: ["Nepal", "Bhutan", "Tibet", "Sikkim"], correct: "Bhutan", exp: "The Druk (Thunder Dragon) is Bhutan's national symbol, clutching jewels representing wealth and security." },
+      { id: 22, flagId: "lesotho", question: "Which kingdom, completely surrounded by South Africa, features a black traditional Mokorotlo hat?", options: ["Lesotho", "Eswatini", "Namibia", "Botswana"], correct: "Lesotho", exp: "The Mokorotlo is a traditional straw hat that represents the cultural heritage of the Basotho people." },
+      { id: 23, flagId: "vanuatu", question: "Which Melanesian country has a red and green flag with a black triangle, yellow Y-shape, and boar's tusk?", options: ["Vanuatu", "Fiji", "Samoa", "Solomon Islands"], correct: "Vanuatu", exp: "The boar's tusk is a traditional symbol of prosperity, and the Y-shape represents the layout of the archipelago's islands." },
+      { id: 24, flagId: "st_kitts", question: "Which nation's flag features a diagonal black band with two white stars, separating green and red panels?", options: ["Saint Kitts and Nevis", "Grenada", "Suriname", "Dominica"], correct: "Saint Kitts and Nevis", exp: "The green represents fertility, red represents the liberation struggle, and the stars represent liberty and hope." },
+      { id: 25, flagId: "timor_leste", question: "Which young Southeast Asian nation's flag is red with a yellow triangle overlaid by a black triangle and a white star?", options: ["Timor-Leste", "Brunei", "Singapore", "Cambodia"], correct: "Timor-Leste", exp: "The black triangle represents colonial obscurantism, the yellow represents traces of colonialism, and the white star represents peace." }
+    ];
+
+    const ARCHIVES_GK_QUESTIONS = [
+      { id: 1, question: "Which is the largest landlocked country in the world by land area?", options: ["Kazakhstan", "Mongolia", "Bolivia", "Chad"], correct: "Kazakhstan", exp: "Kazakhstan is the largest landlocked country, spanning over 2.7 million square kilometers." },
+      { id: 2, question: "The deepest point on dry land on Earth is located near which body of water?", options: ["Lake Baikal", "The Dead Sea", "Death Valley", "Caspian Sea"], correct: "The Dead Sea", exp: "The shores of the Dead Sea sit at roughly 430 meters below sea level." },
+      { id: 3, question: "Which strait separates the southern tip of South America from Antarctica?", options: ["Gibraltar Strait", "Drake Passage", "Magellan Strait", "Malacca Strait"], correct: "Drake Passage", exp: "The Drake Passage connects the southern oceans with turbulent atmospheric conditions." },
+      { id: 4, question: "What is the capital city of Australia?", options: ["Sydney", "Melbourne", "Canberra", "Brisbane"], correct: "Canberra", exp: "Canberra was chosen as a federal compromise city site in 1908." },
+      { id: 5, question: "Which river flows through the most capital cities in the world?", options: ["Nile", "Danube", "Amazon", "Mekong"], correct: "Danube", exp: "The Danube passes through four capitals: Vienna, Bratislava, Budapest, and Belgrade." },
+      { id: 6, question: "Which European country is divided into regions called Cantons?", options: ["Austria", "Switzerland", "Belgium", "Norway"], correct: "Switzerland", exp: "Switzerland features 26 semi-autonomous federal cantons." },
+      { id: 7, question: "Which country has the most natural lakes in the world?", options: ["Canada", "Russia", "USA", "Brazil"], correct: "Canada", exp: "Over 60% of the world's natural lakes exist inside Canada's vast regions." },
+      { id: 8, question: "What active volcano destroyed ancient Pompeii in 79 AD?", options: ["Mount Etna", "Mount Vesuvius", "Krakatoa", "Mount Stromboli"], correct: "Mount Vesuvius", exp: "Mount Vesuvius on the Gulf of Naples exploded with devastating structural fallout." },
+      { id: 9, question: "Which African country was historically recognized as Abyssinia?", options: ["Egypt", "Ethiopia", "Sudan", "Algeria"], correct: "Ethiopia", exp: "Abyssinia was the historically recognized name of the Ethiopian empire." },
+      { id: 10, question: "In which ocean is the island nation of Madagascar located?", options: ["Pacific Ocean", "Indian Ocean", "Atlantic Ocean", "Southern Ocean"], correct: "Indian Ocean", exp: "Madagascar sits in the southwestern reaches of the Indian Ocean." },
+      { id: 11, question: "Which artificial canal opened in 1869, connecting the Mediterranean to the Red Sea?", options: ["Panama Canal", "Suez Canal", "Kiel Canal", "Erie Canal"], correct: "Suez Canal", exp: "Suez Canal allows maritime logistics routes to bypass navigation around Africa." },
+      { id: 12, question: "Which mountain range separates European Russia from Siberian Russia?", options: ["Alps", "Ural Mountains", "Caucasus", "Pyrenees"], correct: "Ural Mountains", exp: "Ural Mountains are the classic geographic demarcation line between Europe and Asia." },
+      { id: 13, question: "Which country has the highest population density in the world?", options: ["Singapore", "Monaco", "Bangladesh", "Maldives"], correct: "Monaco", exp: "Monaco has an estimated density exceeding 19,000 residents per square km." },
+      { id: 14, question: "Which country is called 'Land of the Midnight Sun'?", options: ["Sweden", "Norway", "Finland", "Iceland"], correct: "Norway", exp: "Norway's high latitude positions segments inside the Arctic circle with endless summers." },
+      { id: 15, question: "Which desert is located in Chile and is known as the driest non-polar desert?", options: ["Sahara", "Atacama", "Gobi", "Kalahari"], correct: "Atacama", exp: "Atacama Desert experiences absolute arid climate index scores." },
+      { id: 16, question: "What is the official currency of South Africa?", options: ["Rand", "Shilling", "Pound", "Rupee"], correct: "Rand", exp: "The South African Rand (ZAR) was initialized in 1961." },
+      { id: 17, question: "Which country shares the longest border with the United States?", options: ["Mexico", "Canada", "Russia", "Cuba"], correct: "Canada", exp: "The Canada-US land boundary spans 8,891 kilometers." },
+      { id: 18, question: "What is the tallest waterfall in the world?", options: ["Niagara Falls", "Victoria Falls", "Angel Falls", "Iguazu Falls"], correct: "Angel Falls", exp: "Angel Falls inside Venezuela drops water down an uninterrupted 807 meters." },
+      { id: 19, question: "Which country produces the most coffee globally?", options: ["Colombia", "Vietnam", "Ethiopia", "Brazil"], correct: "Brazil", exp: "Brazil dominates coffee exports since the 19th century." },
+      { id: 20, question: "Which island is the largest non-continental island globally?", options: ["Australia", "Greenland", "New Guinea", "Borneo"], correct: "Greenland", exp: "Greenland is a self-governing Danish island territory." },
+      { id: 21, question: "Which ancient empire constructed the citadel of Machu Picchu?", options: ["Aztecs", "Mayans", "Incas", "Egyptians"], correct: "Incas", exp: "Machu Picchu is a classical masterpiece of the mountain Incas." },
+      { id: 22, question: "What is the smallest country globally by land area?", options: ["Monaco", "San Marino", "Vatican City", "Liechtenstein"], correct: "Vatican City", exp: "Vatican City covers just 0.49 square kilometers." },
+      { id: 23, question: "Which line of latitude passes through the northernmost parts of South America?", options: ["Tropic of Cancer", "Equator", "Tropic of Capricorn", "Arctic Circle"], correct: "Equator", exp: "The Equator crosses directly through Ecuador, Colombia, and Brazil." },
+      { id: 24, question: "Which country's national flag is non-rectangular?", options: ["Bhutan", "Nepal", "Switzerland", "Vatican City"], correct: "Nepal", exp: "Nepal's flag is formed by two overlapping triangular banners." },
+      { id: 25, question: "Which sea is located between Great Britain and mainland Europe?", options: ["Baltic Sea", "North Sea", "Mediterranean Sea", "Black Sea"], correct: "North Sea", exp: "The North Sea is a strategic marginal arm of the Atlantic Ocean." }
+    ];
+
+    const ARCHIVES_SPORTS_QUESTIONS = [
+      { id: 1, question: "Which country has won the most FIFA World Cup titles?", options: ["Germany", "Italy", "Argentina", "Brazil"], correct: "Brazil", exp: "Brazil has clinched five FIFA World Cup trophies (1958, 1962, 1970, 1994, 2002)." },
+      { id: 2, question: "Who is the all-time top goalscorer in men's international football?", options: ["Lionel Messi", "Cristiano Ronaldo", "Pelé", "Ali Daei"], correct: "Cristiano Ronaldo", exp: "Cristiano Ronaldo holds the international benchmark for Portugal." },
+      { id: 3, question: "Which football club has won the most UEFA Champions League trophies?", options: ["AC Milan", "FC Barcelona", "Real Madrid", "Bayern Munich"], correct: "Real Madrid", exp: "Real Madrid has won over 14 continental trophies." },
+      { id: 4, question: "Which country hosted the first-ever FIFA World Cup in 1930?", options: ["Uruguay", "Italy", "Argentina", "France"], correct: "Uruguay", exp: "Uruguay hosted and won the inaugural tournament in 1930." },
+      { id: 5, question: "Who scored the famous 'Hand of God' goal during the 1986 World Cup?", options: ["Diego Maradona", "Pelé", "Zinedine Zidane", "Johan Cruyff"], correct: "Diego Maradona", exp: "Diego Maradona scored this controversial goal against England." },
+      { id: 6, question: "Which English football club has won the most top-flight league titles?", options: ["Arsenal", "Liverpool", "Manchester United", "Chelsea"], correct: "Manchester United", exp: "Manchester United holds 20 English top-flight titles." },
+      { id: 7, question: "Who is the youngest player ever to win a FIFA World Cup?", options: ["Pelé", "Kylian Mbappé", "Lionel Messi", "Diego Maradona"], correct: "Pelé", exp: "Pelé won his first World Cup in 1958 at just 17 years old." },
+      { id: 8, question: "Which country won the FIFA World Cup in 2010 held in South Africa?", options: ["Netherlands", "Germany", "Spain", "Brazil"], correct: "Spain", exp: "Spain defeated Netherlands 1-0 in extra time." },
+      { id: 9, question: "Which player has won the most Ballon d'Or awards in football history?", options: ["Cristiano Ronaldo", "Lionel Messi", "Michel Platini", "Johan Cruyff"], correct: "Lionel Messi", exp: "Lionel Messi has claimed a record eight Ballon d'Or trophies." },
+      { id: 10, question: "Which team plays their home matches at the iconic San Siro stadium?", options: ["Juventus", "AC Milan & Inter Milan", "Roma & Lazio", "Napoli"], correct: "AC Milan & Inter Milan", exp: "San Siro is shared by AC Milan and Inter Milan in Milan, Italy." },
+      { id: 11, question: "In football, what is the maximum number of players allowed on the pitch for one team?", options: ["10", "11", "12", "9"], correct: "11", exp: "A standard match has 11 players per team, including one goalkeeper." },
+      { id: 12, question: "Which country did Zinedine Zidane represent in international football?", options: ["Algeria", "France", "Italy", "Belgium"], correct: "France", exp: "Zidane led France to World Cup victory in 1998." },
+      { id: 13, question: "How many minutes is a standard professional football match, excluding extra time?", options: ["80 minutes", "90 minutes", "100 minutes", "120 minutes"], correct: "90 minutes", exp: "A standard match is exactly 90 minutes long." },
+      { id: 14, question: "Who managed Manchester United for 26 years, winning 38 trophies?", options: ["Sir Alex Ferguson", "Arsène Wenger", "José Mourinho", "Pep Guardiola"], correct: "Sir Alex Ferguson", exp: "Sir Alex Ferguson managed Manchester United from 1986 to 2013." },
+      { id: 15, question: "Which country won the UEFA Euro 2020 (played in 2021) tournament?", options: ["England", "Italy", "Spain", "France"], correct: "Italy", exp: "Italy won the tournament by defeating England on penalties." },
+      { id: 16, question: "Which club did Cristiano Ronaldo join after leaving Real Madrid in 2018?", options: ["Manchester United", "Juventus", "Paris Saint-Germain", "Al Nassr"], correct: "Juventus", exp: "Ronaldo transferred to Italian club Juventus in 2018." },
+      { id: 17, question: "Which team is famously nicknamed 'The Gunners'?", options: ["Chelsea", "Tottenham Hotspur", "Arsenal", "West Ham United"], correct: "Arsenal", exp: "Arsenal was founded by munitions workers at the Royal Arsenal." },
+      { id: 18, question: "Which African country was the first to reach the semi-finals of a FIFA World Cup?", options: ["Cameroon", "Senegal", "Ghana", "Morocco"], correct: "Morocco", exp: "Morocco made history at the 2022 World Cup in Qatar." },
+      { id: 19, question: "What is the circumference range of a standard size 5 football used in official matches?", options: ["68-70 cm", "60-62 cm", "72-74 cm", "65-67 cm"], correct: "68-70 cm", exp: "A size 5 ball is standard for adult professional play." },
+      { id: 20, question: "Which German club is famous for their 'Yellow Wall' of passionate fans?", options: ["Bayern Munich", "Borussia Dortmund", "Bayer Leverkusen", "Schalke 04"], correct: "Borussia Dortmund", exp: "The South Stand at Dortmund holds 25,000 standing supporters." },
+      { id: 21, question: "In tennis, what is the term used for a score of zero?", options: ["Nought", "Love", "Nil", "Blank"], correct: "Love", exp: "The term 'Love' is standard for zero in tennis scoring." },
+      { id: 22, question: "Which nation has won the most Olympic gold medals in men's basketball?", options: ["Spain", "Soviet Union", "Yugoslavia", "USA"], correct: "USA", exp: "The United States team has dominated Olympic basketball." },
+      { id: 23, question: "In Cricket, how many players are on the field from the fielding team?", options: ["10", "11", "12", "9"], correct: "11", exp: "The fielding side has exactly 11 players on the pitch." },
+      { id: 24, question: "Which country is the birthplace of golf?", options: ["England", "Scotland", "Ireland", "USA"], correct: "Scotland", exp: "Modern golf originated in 15th-century Scotland." },
+      { id: 25, question: "How many rings are on the official Olympic flag?", options: ["4", "5", "6", "7"], correct: "5", exp: "The five rings represent the five main inhabited continents of the world." }
+    ];
+
+    // FLAG ILLUSTRATION RENDER MAP
+    const FLAG_SVG_CATALOG = {
+      seychelles: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><polygon points="0,300 0,0 200,0" fill="#003F87" /><polygon points="0,300 200,0 400,0" fill="#FCD116" /><polygon points="0,300 400,0 600,0 600,100" fill="#D21034" /><polygon points="0,300 600,100 600,200" fill="#FFFFFF" /><polygon points="0,300 600,200 600,300" fill="#007A3D" /></svg>`,
+      st_lucia: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#63C3D1" /><polygon points="300,30 390,270 210,270" fill="#FFFFFF" /><polygon points="300,60 380,270 220,270" fill="#000000" /><polygon points="300,150 380,270 220,270" fill="#FCD116" /></svg>`,
+      palau: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#4A90E2" /><circle cx="240" cy="150" r="90" fill="#FFDE00" /></svg>`,
+      antigua_barbuda: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#E8112D" /><polygon points="0,0 300,300 600,0" fill="#000000" /><polygon points="100,100 300,300 500,100" fill="#FFFFFF" /><polygon points="150,150 300,300 450,150" fill="#00A3E0" /><circle cx="300" cy="120" r="45" fill="#FCD116" /></svg>`,
+      cabo_verde: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#002A66" /><rect y="150" width="600" height="15" fill="#FFFFFF" /><rect y="165" width="600" height="30" fill="#C8102E" /><rect y="195" width="600" height="15" fill="#FFFFFF" /></svg>`,
+      nauru: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#00205B" /><rect y="142" width="600" height="16" fill="#FFC72C" /></svg>`,
+      marshall_islands: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#0038A8" /><polygon points="0,300 600,0 600,45" fill="#FFFFFF" /><polygon points="0,300 600,45 600,100" fill="#DD7500" /></svg>`,
+      solomon_islands: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><polygon points="0,0 0,270 540,0" fill="#0051BA" /><polygon points="0,300 600,300 600,30" fill="#215B33" /><polygon points="0,270 0,300 60,300 600,30 600,0 540,0" fill="#FCD116" /></svg>`,
+      micronesia: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#6CACE4" /></svg>`,
+      liechtenstein: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="150" fill="#002B7F" /><rect y="150" width="600" height="150" fill="#CE1126" /></svg>`,
+      grenada: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#C8102E" /><polygon points="30,30 300,150 30,270" fill="#007A3D" /><polygon points="570,30 300,150 570,270" fill="#007A3D" /></svg>`,
+      eswatini: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="50" fill="#3E5EB9" /><rect y="50" width="600" height="15" fill="#FFC72C" /><rect y="65" width="600" height="170" fill="#B10931" /></svg>`,
+      brunei: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#FCD116" /><polygon points="0,40 520,300 600,300 600,260 80,0 0,0" fill="#FFFFFF" /></svg>`,
+      djibouti: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="150" fill="#6CABDD" /><rect y="150" width="600" height="150" fill="#12AD2B" /><polygon points="0,0 0,300 230,150" fill="#FFFFFF" /></svg>`,
+      st_vincent: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="150" height="300" fill="#0072C6" /><rect x="150" width="300" height="300" fill="#FCD116" /><rect x="450" width="150" height="300" fill="#009E49" /></svg>`,
+      comoros: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="75" fill="#FFC72C" /><rect y="75" width="600" height="75" fill="#FFFFFF" /><rect y="150" width="600" height="75" fill="#3A75C4" /><rect y="225" width="600" height="75" fill="#CE1126" /><polygon points="0,0 0,300 200,150" fill="#3D8E33" /></svg>`,
+      eritrea: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><polygon points="0,0 600,0 600,150" fill="#0C8B3B" /><polygon points="0,300 600,300 600,150" fill="#0A5EA5" /><polygon points="0,0 0,300 600,150" fill="#D31134" /></svg>`,
+      tuvalu: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#5B92E5" /><rect width="180" height="120" fill="#00247D" /></svg>`,
+      kiribati: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="150" fill="#CE1126" /><rect y="150" width="600" height="150" fill="#002F6C" /></svg>`,
+      suriname: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="60" fill="#3A7D44" /><rect y="60" width="600" height="30" fill="#FFFFFF" /><rect y="90" width="600" height="120" fill="#B60C26" /></svg>`,
+      bhutan: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><polygon points="0,0 600,0 0,300" fill="#FFD100" /><polygon points="600,0 600,300 0,300" fill="#FF4E00" /></svg>`,
+      lesotho: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="100" fill="#00209F" /><rect y="100" width="600" height="100" fill="#FFFFFF" /><rect y="200" width="600" height="100" fill="#009A44" /></svg>`,
+      vanuatu: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="140" fill="#BC002D" /><rect y="160" width="600" height="140" fill="#009543" /><polygon points="0,0 0,300 220,150" fill="#000000" /></svg>`,
+      st_kitts: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><polygon points="0,0 400,0 0,300" fill="#009E49" /><polygon points="600,0 600,300 200,300" fill="#CE1126" /></svg>`,
+      timor_leste: `<svg viewBox="0 0 600 300" class="w-full h-32 rounded-lg shadow"><rect width="600" height="300" fill="#DC241F" /><polygon points="0,0 0,300 260,150" fill="#FFC72C" /></svg>`
+    };
+
+    // SYSTEM MALAYALAM DICTIONARY
+    const MALAYALAM_UI_TRANSLATIONS = {
+      "Home": "ഹോം",
+      "Daily Quiz": "ഡെയ്‌ലി ക്വിസ്",
+      "3 Cabinets": "3 ക്യാബിനറ്റുകൾ",
+      "Current Affairs": "കറന്റ് അഫയേഴ്സ്",
+      "Mock Test": "മോക്ക് ടെസ്റ്റ്",
+      "PSC / UPSC": "PSC / UPSC ഹബ്",
+      "Study Materials": "പഠന വിവരങ്ങൾ",
+      "Saved": "സേവ് ചെയ്തവ",
+      "Wrong Review": "തെറ്റുകൾ തിരുത്തുക",
+      "My Profile": "എന്റെ പ്രൊഫൈൽ",
+      "Leaderboard": "റാങ്ക് ലിസ്റ്റ്",
+      "Owner Vault": "ഓണർ വോൾട്ട്",
+      "Academic Challenge System Live": "പരീക്ഷാ ചലഞ്ച് ലൈവാണ്",
+      "Empower Your Competitive Career Path with": "നിങ്ങളുടെ മത്സരപരീക്ഷാ വിജയം",
+      "Take Mock Test": "മോക്ക് ടെസ്റ്റ് എഴുതുക",
+      "Start Daily Quiz": "ക്വിസ് ആരംഭിക്കുക",
+      "Subject Mastery Breakdown": "വിഷയങ്ങളിലെ പ്രാവീണ്യം",
+      "Overall Accuracy": "കൃത്യതാ നിരക്ക്",
+      "Total XP Earned": "ആകെ നേടിയ XP",
+      "Current Streak": "തുടർച്ചയായ ദിവസങ്ങൾ",
+      "Platform Level": "പ്ലാറ്റ്‌ഫോം ലെവൽ",
+      "Daily Wisdom & Fact Board": "ഇന്നത്തെ അറിവ് ബോർഡ്",
+      "Active Exam Countdowns": "പരീക്ഷാ കൗണ്ട്ഡൗൺ",
+      "Smart AI Quiz Generator": "AI ക്വിസ് ജനറേറ്റർ",
+      "Assemble AI Quiz": "AI ക്വിസ് നിർമ്മിക്കുക"
+    };
+
+    // APP GLOBAL STATE OBJECT
+    let AppState = {
+      currentUser: null,
+      allRegistrations: [],
+      currentLanguage: 'en', // 'en' | 'ml'
+      activeTab: 'home',
+      activeAffairsTab: 'today',
+      
+      // Daily Quiz Tracker
+      dailyCurrentIdx: 0,
+      dailyScore: 0,
+      dailyIsAnswered: false,
+      dailyQuestions: [],
+
+      // Cabinets Gameplay Tracker
+      cabinetType: null,
+      cabinetCurrentIdx: 0,
+      cabinetScore: 0,
+      cabinetIsAnswered: false,
+      cabinetQuestions: [],
+
+      // Mock Exam Tracker
+      mockType: null,
+      mockQuestions: [],
+      mockCurrentIdx: 0,
+      mockAnswers: {}, // index -> answered option
+      mockTimerInterval: null,
+      mockSecondsRemaining: 900
+    };
+
+    // INITIAL APP LIFE CYCLE
+    window.onload = function() {
+      loadStateFromLocalStorage();
+      renderLanguageStrings();
+      checkStreak();
+      lucide.createIcons();
+      initHomeCountdowns();
+    };
+
+    function loadStateFromLocalStorage() {
+      // Load Registered current user profile
+      const savedUser = localStorage.getItem('knowix_current_user_v2');
+      if (savedUser) {
+        AppState.currentUser = JSON.parse(savedUser);
+        document.getElementById('main-platform').classList.remove('hidden');
+        document.getElementById('onboarding-screen').classList.add('hidden');
+        updateProfilePillUI();
+      } else {
+        document.getElementById('onboarding-screen').classList.remove('hidden');
+        document.getElementById('main-platform').classList.add('hidden');
+      }
+
+      // Load Master registrations log
+      const savedRecords = localStorage.getItem('knowix_all_records_v2');
+      if (savedRecords) {
+        AppState.allRegistrations = JSON.parse(savedRecords);
+      } else {
+        const defaultRecords = [
+          { name: "Rahul Sasi", phone: "9008007001", whatsapp: "9008007001", place: "Ernakulam, Kerala", goal: "UPSC Civil Services", timestamp: "12/04/2026, 10:30 AM", xp: 1450, streak: 8, level: 3 }
+        ];
+        localStorage.setItem('knowix_all_records_v2', JSON.stringify(defaultRecords));
+        AppState.allRegistrations = defaultRecords;
+      }
+
+      // Sync master stats
+      recalcSystemPerformanceMetrics();
+    }
+
+    function checkStreak() {
+      if (!AppState.currentUser) return;
+      const today = new Date().toDateString();
+      const lastLogin = AppState.currentUser.lastLoginDate;
+      
+      if (!lastLogin) {
+        AppState.currentUser.streak = 1;
+        AppState.currentUser.lastLoginDate = today;
+      } else if (lastLogin !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (lastLogin === yesterday.toDateString()) {
+          AppState.currentUser.streak += 1;
+        } else {
+          AppState.currentUser.streak = 1; // broken streak
+        }
+        AppState.currentUser.lastLoginDate = today;
+        saveUserProfile();
+        showInAppNotification("Welcome back! Your daily streak has been tracked.");
+      }
+      document.getElementById('streak-count').innerText = AppState.currentUser.streak;
+      document.getElementById('stats-streak').innerText = AppState.currentUser.streak + " Days";
+    }
+
+    // MULTILINGUAL & THEME UTILITIES
+    function toggleLanguage() {
+      AppState.currentLanguage = AppState.currentLanguage === 'en' ? 'ml' : 'en';
+      document.getElementById('lang-switch-lbl').innerText = AppState.currentLanguage === 'en' ? 'Malayalam' : 'English';
+      renderLanguageStrings();
+      showInAppNotification(AppState.currentLanguage === 'en' ? "Language swapped to English" : "ഭാഷ മലയാളത്തിലേക്ക് മാറ്റിയിരിക്കുന്നു");
+    }
+
+    function renderLanguageStrings() {
+      const elements = document.querySelectorAll('[data-lang-en]');
+      elements.forEach(el => {
+        const enVal = el.getAttribute('data-lang-en');
+        const mlVal = el.getAttribute('data-lang-ml');
+        el.innerText = AppState.currentLanguage === 'en' ? enVal : mlVal;
+      });
+
+      // Translate core dynamic tags if translation is available
+      const buttons = document.querySelectorAll('button span, h3 span');
+      buttons.forEach(span => {
+        const originalText = span.innerText;
+        if (AppState.currentLanguage === 'ml' && MALAYALAM_UI_TRANSLATIONS[originalText]) {
+          span.setAttribute('data-orig', originalText);
+          span.innerText = MALAYALAM_UI_TRANSLATIONS[originalText];
+        } else if (AppState.currentLanguage === 'en' && span.getAttribute('data-orig')) {
+          span.innerText = span.getAttribute('data-orig');
+        }
+      });
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('theme-icon');
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        icon.setAttribute('data-lucide', 'moon');
+        showInAppNotification("Light mode toggled.");
+      } else {
+        html.classList.add('dark');
+        icon.setAttribute('data-lucide', 'sun');
+        showInAppNotification("Premium dark mode toggled.");
+      }
+      lucide.createIcons();
+    }
+
+    // AUTH & REGISTRATION LOGIC
+    function handleRegistration(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value;
+      const phone = document.getElementById('reg-phone').value;
+      const whatsapp = document.getElementById('reg-whatsapp').value;
+      const place = document.getElementById('reg-place').value;
+      const goal = document.getElementById('reg-goal').value;
+
+      const newUser = {
+        name,
+        phone,
+        whatsapp,
+        place,
+        goal,
+        xp: 150, // Starter XP gift
+        level: 1,
+        streak: 1,
+        lastLoginDate: new Date().toDateString(),
+        attemptedCount: 0,
+        correctCount: 0,
+        bookmarks: [],
+        wrongAnswers: [],
+        achievements: ["Starter Elite"]
+      };
+
+      AppState.currentUser = newUser;
+      localStorage.setItem('knowix_current_user_v2', JSON.stringify(newUser));
+
+      // Append into Master entries log
+      const fullRecord = { ...newUser, timestamp: new Date().toLocaleString() };
+      AppState.allRegistrations.push(fullRecord);
+      localStorage.setItem('knowix_all_records_v2', JSON.stringify(AppState.allRegistrations));
+
+      // Show Main Dashboard and update
+      document.getElementById('onboarding-screen').classList.add('hidden');
+      document.getElementById('main-platform').classList.remove('hidden');
+      updateProfilePillUI();
+      recalcSystemPerformanceMetrics();
+      showInAppNotification("Account generated successfully! Welcome to Knowix.");
+    }
+
+    function updateProfilePillUI() {
+      if (!AppState.currentUser) return;
+      document.getElementById('profile-pill-name').innerText = AppState.currentUser.name;
+      document.getElementById('profile-pill-xp').innerText = AppState.currentUser.xp + " XP";
+      document.getElementById('user-level').innerText = AppState.currentUser.level;
+    }
+
+    // ROUTING NAVIGATION VIEWS
+    function switchTab(tabId) {
+      AppState.activeTab = tabId;
+      
+      // Toggle CSS highlights
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = "tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-slate-200";
+      });
+      const activeBtn = document.getElementById('tab-' + tabId);
+      if (activeBtn) {
+        activeBtn.className = "tab-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all bg-indigo-600 text-white";
+      }
+
+      // Hide all sections
+      document.querySelectorAll('.viewport-section').forEach(sect => sect.classList.add('hidden'));
+      // Show active tab view
+      const activeSection = document.getElementById('viewport-' + tabId);
+      if (activeSection) {
+        activeSection.classList.remove('hidden');
+      }
+
+      // Load dynamic templates
+      if (tabId === 'profile') renderProfileDashboard();
+      if (tabId === 'leaderboard') renderLeaderboard();
+      if (tabId === 'bookmarks') renderBookmarks();
+      if (tabId === 'review') renderWrongAnswersReview();
+      if (tabId === 'current-affairs') renderCurrentAffairs();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // CLASSIFIED IN-APP NOTIFICATION ALERT
+    function showInAppNotification(text) {
+      const bar = document.getElementById('notification-bar');
+      const textNode = document.getElementById('notification-text');
+      textNode.innerText = text;
+      bar.className = "fixed top-4 right-4 z-50 transform translate-y-0 opacity-100 transition-all duration-350";
+      
+      setTimeout(() => {
+        bar.className = "fixed top-4 right-4 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-350 pointer-events-none";
+      }, 4000);
+    }
+
+    // HOME PANEL TIMED COUNTDOWNS
+    function initHomeCountdowns() {
+      // Static day estimations
+      document.getElementById('countdown-psc').innerText = "42 Days";
+      document.getElementById('countdown-upsc').innerText = "345 Days";
+    }
+
+    // RECALCULATE EXP AND LEVEL STATUS INDICATIONS
+    function recalcSystemPerformanceMetrics() {
+      if (!AppState.currentUser) return;
+      const total = AppState.currentUser.attemptedCount || 0;
+      const correct = AppState.currentUser.correctCount || 0;
+      const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+      document.getElementById('stats-total-xp').innerText = AppState.currentUser.xp + " XP";
+      document.getElementById('stats-accuracy').innerText = accuracy + "%";
+      
+      // Calculate level based on XP milestone thresholds (Every 500 XP = 1 Level)
+      const currentLevel = Math.max(1, Math.floor(AppState.currentUser.xp / 500) + 1);
+      AppState.currentUser.level = currentLevel;
+      document.getElementById('stats-level').innerText = "Level " + currentLevel;
+      document.getElementById('user-level').innerText = currentLevel;
+
+      // Subject mastery breakdowns
+      document.getElementById('mastery-flags').innerText = "85%";
+      document.getElementById('bar-mastery-flags').style.width = "85%";
+      document.getElementById('mastery-gk').innerText = "60%";
+      document.getElementById('bar-mastery-gk').style.width = "60%";
+      document.getElementById('mastery-sports').innerText = "75%";
+      document.getElementById('bar-mastery-sports').style.width = "75%";
+    }
+
+    function addXP(amount) {
+      if (!AppState.currentUser) return;
+      AppState.currentUser.xp += amount;
+      
+      // Check for level ups
+      const initialLevel = AppState.currentUser.level || 1;
+      const computedLevel = Math.floor(AppState.currentUser.xp / 500) + 1;
+      if (computedLevel > initialLevel) {
+        AppState.currentUser.level = computedLevel;
+        showInAppNotification(`🎉 LEVEL UP! You reached Level ${computedLevel}!`);
+      }
+
+      saveUserProfile();
+      recalcSystemPerformanceMetrics();
+      updateProfilePillUI();
+    }
+
+    function saveUserProfile() {
+      if (!AppState.currentUser) return;
+      localStorage.setItem('knowix_current_user_v2', JSON.stringify(AppState.currentUser));
+      
+      // Update entry inside master log list too
+      const currentIdx = AppState.allRegistrations.findIndex(r => r.phone === AppState.currentUser.phone);
+      if (currentIdx !== -1) {
+        AppState.allRegistrations[currentIdx] = { ...AppState.allRegistrations[currentIdx], ...AppState.currentUser };
+        localStorage.setItem('knowix_all_records_v2', JSON.stringify(AppState.allRegistrations));
+      }
+    }
+
+    // DAILY FLUID WISDOM: QUESTION OF THE DAY ANSWERING
+    function answerQotd(btn, status) {
+      // Disable all other options in this session
+      const options = document.getElementById('qotd-box').querySelectorAll('button');
+      options.forEach(b => b.disabled = true);
+
+      if (status === 'correct') {
+        btn.className = "bg-emerald-950/60 border-emerald-500/80 p-2 rounded-xl text-xs text-left text-emerald-200 glow-green-on-correct font-semibold";
+        addXP(10);
+        showInAppNotification("Correct! Earned +10 XP.");
+      } else {
+        btn.className = "bg-rose-950/60 border-rose-500/80 p-2 rounded-xl text-xs text-left text-rose-200 glow-red-on-wrong";
+        showInAppNotification("Incorrect Answer. Try again tomorrow!");
+      }
+    }
+
+    // DYNAMIC DAILY QUIZ CONTROLLER SYSTEM (10 QUESTIONS)
+    function launchDailyQuizChallenge() {
+      AppState.dailyCurrentIdx = 0;
+      AppState.dailyScore = 0;
+      AppState.dailyIsAnswered = false;
+
+      // Select random mix of 10 from general archives
+      const pool = [...ARCHIVES_GK_QUESTIONS, ...ARCHIVES_SPORTS_QUESTIONS];
+      AppState.dailyQuestions = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+
+      document.getElementById('daily-game-wrapper').classList.remove('hidden');
+      document.getElementById('daily-completed-wrapper').classList.add('hidden');
+      
+      renderDailyQuestion();
+    }
+
+    // Booting up screen redirect
+    document.addEventListener("DOMContentLoaded", function() {
+      // Setup triggers
+      document.getElementById('tab-daily').addEventListener('click', launchDailyQuizChallenge);
+    });
+
+    function renderDailyQuestion() {
+      AppState.dailyIsAnswered = false;
+      const currentQ = AppState.dailyQuestions[AppState.dailyCurrentIdx];
+      
+      document.getElementById('daily-index').innerText = AppState.dailyCurrentIdx + 1;
+      document.getElementById('daily-progress-bar').style.width = ((AppState.dailyCurrentIdx + 1) / 10 * 100) + "%";
+      document.getElementById('daily-question-text').innerText = currentQ.question;
+      document.getElementById('daily-feedback-box').classList.add('hidden');
+      document.getElementById('daily-action-row').classList.add('hidden');
+
+      const grid = document.getElementById('daily-options-grid');
+      grid.innerHTML = "";
+
+      currentQ.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-4 rounded-xl border border-slate-800 bg-slate-950 text-xs text-slate-300 transition-all flex justify-between items-center";
+        btn.innerHTML = `<span>${opt}</span>`;
+        btn.onclick = () => submitDailyAnswer(btn, opt);
+        grid.appendChild(btn);
+      });
+    }
+
+    function submitDailyAnswer(selectedBtn, opt) {
+      if (AppState.dailyIsAnswered) return;
+      AppState.dailyIsAnswered = true;
+
+      const currentQ = AppState.dailyQuestions[AppState.dailyCurrentIdx];
+      const correct = currentQ.correct;
+
+      const btns = document.getElementById('daily-options-grid').querySelectorAll('button');
+      
+      btns.forEach(b => {
+        b.disabled = true;
+        // Identify text content inside button correctly
+        const bText = b.querySelector('span').innerText;
+        if (bText === correct) {
+          b.className = "w-full text-left p-4 rounded-xl border border-emerald-500 bg-emerald-950/40 text-xs text-emerald-200 glow-green-on-correct font-semibold transition-all flex justify-between items-center";
+        } else if (b === selectedBtn) {
+          b.className = "w-full text-left p-4 rounded-xl border border-rose-500 bg-rose-950/40 text-xs text-rose-200 glow-red-on-wrong transition-all flex justify-between items-center";
+        } else {
+          b.className = "w-full text-left p-4 rounded-xl border border-slate-900 bg-slate-950/30 text-xs text-slate-600 opacity-60 transition-all flex justify-between items-center";
+        }
+      });
+
+      // Update global user statistics
+      AppState.currentUser.attemptedCount += 1;
+
+      if (opt === correct) {
+        AppState.dailyScore += 1;
+        AppState.currentUser.correctCount += 1;
+        document.getElementById('daily-feedback-status').className = "text-xs font-bold font-mono text-emerald-400";
+        document.getElementById('daily-feedback-status').innerText = "✓ CORRECT CLASSIFICATION";
+        addXP(15); // +15 XP for correct
+      } else {
+        document.getElementById('daily-feedback-status').className = "text-xs font-bold font-mono text-rose-400";
+        document.getElementById('daily-feedback-status').innerText = "✕ INCORRECT CLASSIFICATION";
+        
+        // Log incorrectly answered questions inside review system
+        logWrongAnswer(currentQ);
+      }
+
+      document.getElementById('daily-explanation-text').innerText = currentQ.exp || "No explanation archive found.";
+      document.getElementById('daily-feedback-box').classList.remove('hidden');
+      document.getElementById('daily-action-row').classList.remove('hidden');
+      
+      saveUserProfile();
+    }
+
+    function nextDailyQuestion() {
+      if (AppState.dailyCurrentIdx + 1 < 10) {
+        AppState.dailyCurrentIdx += 1;
+        renderDailyQuestion();
+      } else {
+        // Complete state
+        document.getElementById('daily-game-wrapper').classList.add('hidden');
+        document.getElementById('daily-completed-wrapper').classList.remove('hidden');
+        document.getElementById('daily-final-score').innerText = AppState.dailyScore + " / 10";
+        
+        const xpEarned = AppState.dailyScore * 15;
+        document.getElementById('daily-xp-gained').innerText = `+${xpEarned} XP`;
+        document.getElementById('daily-current-score').innerText = AppState.dailyScore;
+        
+        showInAppNotification("Daily session scorecard saved!");
+      }
+    }
+
+    // INTERACTIVE SYSTEM CABINET SECTIONS ENGINE (25 QUESTIONS)
+    function startCabinet(type) {
+      AppState.cabinetType = type;
+      AppState.cabinetCurrentIdx = 0;
+      AppState.cabinetScore = 0;
+      AppState.cabinetIsAnswered = false;
+
+      if (type === 'flags') {
+        AppState.cabinetQuestions = ARCHIVES_FLAG_QUESTIONS;
+        document.getElementById('cabinet-game-title').innerText = "Cabinet I: Flag Heraldry";
+      } else if (type === 'gk') {
+        AppState.cabinetQuestions = ARCHIVES_GK_QUESTIONS;
+        document.getElementById('cabinet-game-title').innerText = "Cabinet II: Global GK";
+      } else {
+        AppState.cabinetQuestions = ARCHIVES_SPORTS_QUESTIONS;
+        document.getElementById('cabinet-game-title').innerText = "Cabinet III: Sports Arena";
+      }
+
+      document.getElementById('cabinets-catalog').classList.add('hidden');
+      document.getElementById('cabinet-gameplay').classList.remove('hidden');
+      document.getElementById('cabinet-completed').classList.add('hidden');
+
+      renderCabinetQuestion();
+    }
+
+    function exitCabinet() {
+      document.getElementById('cabinets-catalog').classList.remove('hidden');
+      document.getElementById('cabinet-gameplay').classList.add('hidden');
+      document.getElementById('cabinet-completed').classList.add('hidden');
+    }
+
+    function renderCabinetQuestion() {
+      AppState.cabinetIsAnswered = false;
+      const currentQ = AppState.cabinetQuestions[AppState.cabinetCurrentIdx];
+
+      document.getElementById('cabinet-index').innerText = AppState.cabinetCurrentIdx + 1;
+      document.getElementById('cabinet-progress-bar').style.width = ((AppState.cabinetCurrentIdx + 1) / 25 * 100) + "%";
+      document.getElementById('cabinet-question-text').innerText = currentQ.question;
+      document.getElementById('cabinet-feedback-box').classList.add('hidden');
+      document.getElementById('cabinet-action-row').classList.add('hidden');
+
+      // Setup Bookmark status
+      const icon = document.getElementById('cabinet-bookmark-icon');
+      if (isCurrentQuestionBookmarked(currentQ.id)) {
+        icon.className = "w-4 h-4 text-indigo-400 fill-indigo-400";
+      } else {
+        icon.className = "w-4 h-4 text-slate-500";
+      }
+
+      // Handle Flag illustrations displays
+      const flagDisplayBox = document.getElementById('cabinet-flag-display');
+      if (AppState.cabinetType === 'flags') {
+        flagDisplayBox.innerHTML = FLAG_SVG_CATALOG[currentQ.flagId] || "Vector render offline.";
+        flagDisplayBox.classList.remove('hidden');
+      } else {
+        flagDisplayBox.classList.add('hidden');
+      }
+
+      const grid = document.getElementById('cabinet-options-grid');
+      grid.innerHTML = "";
+
+      currentQ.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-4 rounded-xl border border-slate-800 bg-slate-950 text-xs text-slate-300 transition-all flex justify-between items-center";
+        btn.innerHTML = `<span>${opt}</span>`;
+        btn.onclick = () => submitCabinetAnswer(btn, opt);
+        grid.appendChild(btn);
+      });
+    }
+
+    function submitCabinetAnswer(selectedBtn, opt) {
+      if (AppState.cabinetIsAnswered) return;
+      AppState.cabinetIsAnswered = true;
+
+      const currentQ = AppState.cabinetQuestions[AppState.cabinetCurrentIdx];
+      const correct = currentQ.correct;
+
+      const btns = document.getElementById('cabinet-options-grid').querySelectorAll('button');
+
+      btns.forEach(b => {
+        b.disabled = true;
+        const bText = b.querySelector('span').innerText;
+        if (bText === correct) {
+          b.className = "w-full text-left p-4 rounded-xl border border-emerald-500 bg-emerald-950/40 text-xs text-emerald-200 glow-green-on-correct font-semibold transition-all flex justify-between items-center";
+        } else if (b === selectedBtn) {
+          b.className = "w-full text-left p-4 rounded-xl border border-rose-500 bg-rose-950/40 text-xs text-rose-200 glow-red-on-wrong transition-all flex justify-between items-center";
+        } else {
+          b.className = "w-full text-left p-4 rounded-xl border border-slate-900 bg-slate-950/30 text-xs text-slate-600 opacity-60 transition-all flex justify-between items-center";
+        }
+      });
+
+      AppState.currentUser.attemptedCount += 1;
+
+      if (opt === correct) {
+        AppState.cabinetScore += 1;
+        AppState.currentUser.correctCount += 1;
+        document.getElementById('cabinet-feedback-status').className = "text-xs font-bold font-mono text-emerald-400";
+        document.getElementById('cabinet-feedback-status').innerText = "✓ CORRECT CLASSIFICATION";
+        addXP(20); // 20 XP for correct cabinet question
+      } else {
+        document.getElementById('cabinet-feedback-status').className = "text-xs font-bold font-mono text-rose-400";
+        document.getElementById('cabinet-feedback-status').innerText = "✕ INCORRECT CLASSIFICATION";
+        
+        logWrongAnswer(currentQ);
+      }
+
+      document.getElementById('cabinet-explanation-text').innerText = currentQ.exp || currentQ.explanation || "System explanation archived.";
+      document.getElementById('cabinet-feedback-box').classList.remove('hidden');
+      document.getElementById('cabinet-action-row').classList.remove('hidden');
+
+      saveUserProfile();
+    }
+
+    function nextCabinetQuestion() {
+      if (AppState.cabinetCurrentIdx + 1 < 25) {
+        AppState.cabinetCurrentIdx += 1;
+        renderCabinetQuestion();
+      } else {
+        // Concluded Cabinet
+        document.getElementById('cabinet-gameplay').classList.add('hidden');
+        document.getElementById('cabinet-completed').classList.remove('hidden');
+        document.getElementById('cabinet-final-score').innerText = AppState.cabinetScore + " / 25";
+        
+        const gainedXp = AppState.cabinetScore * 20;
+        document.getElementById('cabinet-xp-gained').innerText = `+${gainedXp} XP`;
+        
+        // Dynamic Badge check evaluations
+        evaluateClassifiedMilestones();
+        showInAppNotification("Cabinet completed successfully!");
+      }
+    }
+
+    function restartCabinetGame() {
+      startCabinet(AppState.cabinetType);
+    }
+
+    // MOCK QUIZ CATEGORY ASSISTANTS
+    function startCategoryQuiz(cat) {
+      switchTab('folders');
+      if (cat.includes('history')) startCabinet('gk');
+      else if (cat.includes('geo')) startCabinet('gk');
+      else if (cat.includes('science')) startCabinet('gk');
+      else if (cat.includes('polity')) startCabinet('gk');
+      else startCabinet('sports');
+    }
+
+    // AI QUIZ SIMULATED GENERATOR
+    function generateAIQuiz() {
+      const select = document.getElementById('ai-category-select').value;
+      showInAppNotification(`Assembling customized AI Quiz from Category: ${select.toUpperCase()}...`);
+      setTimeout(() => {
+        switchTab('folders');
+        startCabinet('gk');
+      }, 1500);
+    }
+
+    // BOOKMARKS SECURITY SYSTEM
+    function isCurrentQuestionBookmarked(qId) {
+      if (!AppState.currentUser) return false;
+      return AppState.currentUser.bookmarks.includes(qId);
+    }
+
+    function toggleBookmarkCurrentQuestion() {
+      if (!AppState.currentUser) return;
+      const currentQ = AppState.cabinetQuestions[AppState.cabinetCurrentIdx];
+      const idx = AppState.currentUser.bookmarks.indexOf(currentQ.id);
+      
+      const icon = document.getElementById('cabinet-bookmark-icon');
+      if (idx !== -1) {
+        AppState.currentUser.bookmarks.splice(idx, 1);
+        icon.className = "w-4 h-4 text-slate-500";
+        showInAppNotification("Question removed from bookmarked list.");
+      } else {
+        AppState.currentUser.bookmarks.push(currentQ.id);
+        icon.className = "w-4 h-4 text-indigo-400 fill-indigo-400";
+        showInAppNotification("Question successfully saved in bookmarks.");
+      }
+      saveUserProfile();
+    }
+
+    function renderBookmarks() {
+      const container = document.getElementById('bookmarks-catalog');
+      container.innerHTML = "";
+
+      if (!AppState.currentUser || AppState.currentUser.bookmarks.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-8">No bookmarked questions compiled yet.</p>`;
+        return;
+      }
+
+      // Render bookmarked questions
+      const pool = [...ARCHIVES_FLAG_QUESTIONS, ...ARCHIVES_GK_QUESTIONS, ...ARCHIVES_SPORTS_QUESTIONS];
+      const savedQs = pool.filter(q => AppState.currentUser.bookmarks.includes(q.id));
+
+      savedQs.forEach(q => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2 text-xs relative";
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <span class="text-[9px] text-indigo-400 font-mono uppercase tracking-widest font-bold">Question ID #${q.id}</span>
+            <button onclick="removeBookmarkDirect(${q.id})" class="text-slate-500 hover:text-rose-400">Remove ✕</button>
+          </div>
+          <h4 class="font-bold text-slate-200">${q.question}</h4>
+          <p class="text-[11px] text-slate-400 italic">Correct Answer: <span class="text-emerald-400 font-bold">${q.correct}</span></p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function removeBookmarkDirect(id) {
+      if (!AppState.currentUser) return;
+      const idx = AppState.currentUser.bookmarks.indexOf(id);
+      if (idx !== -1) {
+        AppState.currentUser.bookmarks.splice(idx, 1);
+        saveUserProfile();
+        renderBookmarks();
+        showInAppNotification("Bookmark removed.");
+      }
+    }
+
+    // WRONG ANSWER LEDGER REVIEW
+    function logWrongAnswer(qObj) {
+      if (!AppState.currentUser) return;
+      const alreadyExists = AppState.currentUser.wrongAnswers.some(w => w.id === qObj.id);
+      if (!alreadyExists) {
+        AppState.currentUser.wrongAnswers.push(qObj);
+        saveUserProfile();
+      }
+    }
+
+    function renderWrongAnswersReview() {
+      const container = document.getElementById('wrong-answers-catalog');
+      container.innerHTML = "";
+
+      if (!AppState.currentUser || AppState.currentUser.wrongAnswers.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-8">No incorrect items logged yet. Perfect record!</p>`;
+        return;
+      }
+
+      AppState.currentUser.wrongAnswers.forEach((q, index) => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2 text-xs relative";
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <span class="text-[9px] text-pink-400 font-mono uppercase tracking-widest font-bold">Wrong entry review</span>
+            <button onclick="clearWrongAnswerDirect(${index})" class="text-emerald-400 hover:text-emerald-300 font-bold">Mastered ✓</button>
+          </div>
+          <h4 class="font-bold text-slate-200">${q.question}</h4>
+          <p class="text-slate-400 leading-normal">${q.exp || q.explanation || "System data loaded."}</p>
+          <div class="bg-slate-950 p-2.5 rounded-lg text-[11px] text-slate-500">Correct Answer: <span class="text-emerald-400 font-bold">${q.correct}</span></div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function clearWrongAnswerDirect(idx) {
+      if (!AppState.currentUser) return;
+      AppState.currentUser.wrongAnswers.splice(idx, 1);
+      addXP(10); // Reward mastery review!
+      saveUserProfile();
+      renderWrongAnswersReview();
+      showInAppNotification("Review item mastered! Earned +10 XP.");
+    }
+
+    // CURRENT AFFAIRS LOADER
+    function renderCurrentAffairs() {
+      const tab = AppState.activeAffairsTab;
+      const content = document.getElementById('affairs-content');
+      content.innerHTML = "";
+
+      const data = {
+        today: [
+          "<strong>Climate Policy Milestone:</strong> Union Cabinet approves critical carbon offset incentives scheme aligning with 2030 targets.",
+          "<strong>Digital Literacy Mission:</strong> Kerala State Literacy Mission deploys new local council educational centers.",
+          "<strong>Financial Sector reforms:</strong> Reserve Bank updates digital loan guidelines regarding transparency parameters."
+        ],
+        weekly: [
+          "<strong>G20 Energy Ministerial Meet:</strong> Comprehensive clean electricity grid integration targets finalized.",
+          "<strong>Space logistics:</strong> ISRO successfully performs dry-run launch rehearsals of standard heavy-duty booster core."
+        ],
+        monthly: [
+          "<strong>Economic Forecast Index:</strong> National GDP projections recalibrated to a stable 7.2% forecast.",
+          "<strong>Ecology restoration:</strong> Western Ghats ecological survey reports stabilizing parameters on key elephant corridor regions."
+        ]
+      };
+
+      const activeList = data[tab] || [];
+      const ul = document.createElement('ul');
+      ul.className = "space-y-3";
+      
+      activeList.forEach(item => {
+        const li = document.createElement('li');
+        li.className = "bg-slate-950/60 p-3.5 rounded-xl border border-slate-850";
+        li.innerHTML = item;
+        ul.appendChild(li);
+      });
+
+      content.appendChild(ul);
+    }
+
+    function switchAffairsTab(tabId) {
+      AppState.activeAffairsTab = tabId;
+      document.getElementById('btn-affairs-today').className = "text-slate-400 hover:text-slate-200 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all";
+      document.getElementById('btn-affairs-weekly').className = "text-slate-400 hover:text-slate-200 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all";
+      document.getElementById('btn-affairs-monthly').className = "text-slate-400 hover:text-slate-200 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all";
+
+      document.getElementById('btn-affairs-' + tabId).className = "bg-indigo-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all";
+      renderCurrentAffairs();
+    }
+
+    function answerAffairsQuiz(btn, status) {
+      const btns = document.getElementById('affairs-quiz-options').querySelectorAll('button');
+      btns.forEach(b => b.disabled = true);
+
+      if (status === 'correct') {
+        btn.className = "w-full text-left p-3 bg-emerald-950/50 border-emerald-500/80 rounded-xl text-xs text-emerald-200 font-bold glow-green-on-correct";
+        addXP(15);
+        showInAppNotification("Correct! Earned +15 XP.");
+      } else {
+        btn.className = "w-full text-left p-3 bg-rose-950/50 border-rose-500/80 rounded-xl text-xs text-rose-200 glow-red-on-wrong";
+        showInAppNotification("Incorrect classification. Study archives!");
+      }
+    }
+
+    function downloadCurrentAffairsPDF() {
+      showInAppNotification("Compiling current affairs news briefs into high-retention PDF. Download initiated...");
+    }
+
+    // LIVE GLOBAL SEARCH ALGORITHM
+    function handleGlobalSearch(term) {
+      const box = document.getElementById('search-results-box');
+      const list = document.getElementById('search-results-list');
+      
+      if (!term.trim()) {
+        box.classList.add('hidden');
+        return;
+      }
+
+      list.innerHTML = "";
+      box.classList.remove('hidden');
+
+      const queryTerm = term.toLowerCase();
+      const allPool = [...ARCHIVES_GK_QUESTIONS, ...ARCHIVES_SPORTS_QUESTIONS, ...ARCHIVES_FLAG_QUESTIONS];
+      const matches = allPool.filter(q => q.question.toLowerCase().includes(queryTerm));
+
+      if (matches.length > 0) {
+        matches.slice(0, 5).forEach(m => {
+          const item = document.createElement('div');
+          item.className = "p-2 bg-slate-950 border border-slate-900 rounded-lg flex justify-between";
+          item.innerHTML = `
+            <span>${m.question}</span>
+            <span class="text-indigo-400 shrink-0 font-bold">${m.correct}</span>
+          `;
+          list.appendChild(item);
+        });
+      } else {
+        list.innerHTML = `<p class="text-slate-500 italic">No exact syllabus matches inside local registers.</p>`;
+      }
+    }
+
+    function closeSearchResults() {
+      document.getElementById('global-search').value = "";
+      document.getElementById('search-results-box').classList.add('hidden');
+    }
+
+    // TIMED MOCK TEST SYSTEM ENGINE
+    function startMockExam() {
+      const pattern = document.getElementById('mock-exam-pattern').value;
+      AppState.mockType = pattern;
+      AppState.mockCurrentIdx = 0;
+      AppState.mockAnswers = {};
+
+      let pool = [...ARCHIVES_GK_QUESTIONS, ...ARCHIVES_SPORTS_QUESTIONS];
+      AppState.mockQuestions = pool.sort(() => 0.5 - Math.random()).slice(0, 25);
+
+      document.getElementById('mock-badge-title').innerText = pattern.toUpperCase().replace('_', ' ');
+      document.getElementById('mock-setup-box').classList.add('hidden');
+      document.getElementById('mock-exam-box').classList.remove('hidden');
+      document.getElementById('mock-report-box').classList.add('hidden');
+
+      // Setup Timer countdown duration
+      AppState.mockSecondsRemaining = 900; // 15 mins
+      document.getElementById('mock-stopwatch').innerText = "15:00";
+      
+      clearInterval(AppState.mockTimerInterval);
+      AppState.mockTimerInterval = setInterval(updateMockCountdown, 1000);
+
+      renderMockQuestion();
+    }
+
+    function updateMockCountdown() {
+      if (AppState.mockSecondsRemaining > 0) {
+        AppState.mockSecondsRemaining -= 1;
+        const mins = Math.floor(AppState.mockSecondsRemaining / 60);
+        const secs = AppState.mockSecondsRemaining % 60;
+        document.getElementById('mock-stopwatch').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      } else {
+        terminateMockExamEarly();
+      }
+    }
+
+    function renderMockQuestion() {
+      const idx = AppState.mockCurrentIdx;
+      const currentQ = AppState.mockQuestions[idx];
+
+      document.getElementById('mock-current-idx-lbl').innerText = idx + 1;
+      document.getElementById('mock-total-idx-lbl').innerText = AppState.mockQuestions.length;
+      document.getElementById('mock-question-text').innerText = currentQ.question;
+
+      const grid = document.getElementById('mock-options-grid');
+      grid.innerHTML = "";
+
+      currentQ.options.forEach(opt => {
+        const btn = document.createElement('button');
+        const isSelected = AppState.mockAnswers[idx] === opt;
+        
+        btn.className = isSelected 
+          ? "w-full text-left p-4 rounded-xl border border-indigo-500 bg-indigo-950/40 text-xs text-indigo-200 glow-indigo" 
+          : "w-full text-left p-4 rounded-xl border border-slate-800 bg-slate-950 text-xs text-slate-300 transition-all";
+        
+        btn.innerHTML = `<span>${opt}</span>`;
+        btn.onclick = () => {
+          AppState.mockAnswers[idx] = opt;
+          renderMockQuestion(); // refresh selection view
+        };
+        grid.appendChild(btn);
+      });
+    }
+
+    function navigateMockQuestion(offset) {
+      const target = AppState.mockCurrentIdx + offset;
+      if (target >= 0 && target < AppState.mockQuestions.length) {
+        AppState.mockCurrentIdx = target;
+        renderMockQuestion();
+      }
+    }
+
+    function terminateMockExamEarly() {
+      clearInterval(AppState.mockTimerInterval);
+      document.getElementById('mock-exam-box').classList.add('hidden');
+      document.getElementById('mock-report-box').classList.remove('hidden');
+
+      let correctCount = 0;
+      AppState.mockQuestions.forEach((q, idx) => {
+        if (AppState.mockAnswers[idx] === q.correct) {
+          correctCount += 1;
+        }
+      });
+
+      document.getElementById('mock-score-total').innerText = AppState.mockQuestions.length;
+      document.getElementById('mock-score-correct').innerText = correctCount;
+
+      // Update core stats
+      AppState.currentUser.attemptedCount += AppState.mockQuestions.length;
+      AppState.currentUser.correctCount += correctCount;
+      addXP(correctCount * 10);
+      
+      showInAppNotification("Mock results submitted and tabulated.");
+    }
+
+    // PROFILE DASHBOARD BUILDER
+    function renderProfileDashboard() {
+      if (!AppState.currentUser) return;
+      document.getElementById('profile-letter-avatar').innerText = AppState.currentUser.name[0].toUpperCase();
+      document.getElementById('profile-full-name').innerText = AppState.currentUser.name;
+      document.getElementById('profile-study-focus').innerText = `Focus: ${AppState.currentUser.goal}`;
+
+      document.getElementById('profile-stat-attempted').innerText = AppState.currentUser.attemptedCount;
+      document.getElementById('profile-stat-correct').innerText = AppState.currentUser.correctCount;
+      
+      const acc = AppState.currentUser.attemptedCount > 0 ? Math.round((AppState.currentUser.correctCount / AppState.currentUser.attemptedCount) * 100) : 0;
+      document.getElementById('profile-stat-accuracy').innerText = acc + "%";
+      document.getElementById('profile-stat-level').innerText = "Level " + AppState.currentUser.level;
+
+      // Render achievement badges
+      renderBadgeLedgers();
+    }
+
+    function renderBadgeLedgers() {
+      const grid = document.getElementById('achievements-catalog-grid');
+      grid.innerHTML = "";
+
+      const badges = [
+        { title: "Starter Elite", desc: "First verification step complete.", icon: "award" },
+        { title: "GK Master", desc: "Correctly answered 25 general knowledge questions.", icon: "shield" },
+        { title: "Sports Champion", desc: "Clear 25 questions in the Sports Arena.", icon: "trophy" },
+        { title: "Streak General", desc: "Maintain a daily login streak greater than 5 days.", icon: "flame" }
+      ];
+
+      badges.forEach(b => {
+        const isEarned = AppState.currentUser.xp > 200 || b.title === "Starter Elite";
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-2xl border ${isEarned ? 'bg-slate-900 border-indigo-500/20 text-slate-200 shadow-md' : 'bg-slate-950/40 border-slate-900 text-slate-600 opacity-60'}`;
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl"><i data-lucide="${b.icon}" class="w-5 h-5"></i></div>
+            <div>
+              <h4 class="text-xs font-bold">${b.title}</h4>
+              <p class="text-[10px] text-slate-500 leading-normal">${b.desc}</p>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function evaluateClassifiedMilestones() {
+      // Auto unlock badges
+      if (AppState.cabinetScore >= 20) {
+        if (!AppState.currentUser.achievements.includes("GK Master")) {
+          AppState.currentUser.achievements.push("GK Master");
+          showInAppNotification("🏆 Badge Unlocked: GK Master!");
+        }
+      }
+      saveUserProfile();
+    }
+
+    // LEADERS BOARD LOADER
+    function renderLeaderboard() {
+      const rows = document.getElementById('leaderboard-table-rows');
+      rows.innerHTML = "";
+
+      // Combine real user with standard mock rankings for dynamic competitiveness
+      const usersList = [
+        ...AppState.allRegistrations,
+        { name: "Suresh Pillai", xp: 1200, streak: 6, goal: "Kerala PSC LDC" },
+        { name: "Ananya Roy", xp: 950, streak: 4, goal: "UPSC Civil Services" },
+        { name: "Amal Jose", xp: 800, streak: 3, goal: "Both & General GK Elite" }
+      ];
+
+      // Sort by XP
+      usersList.sort((a, b) => b.xp - a.xp);
+
+      usersList.forEach((user, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = user.phone === AppState.currentUser.phone ? "bg-indigo-950/20 font-bold text-indigo-300" : "hover:bg-slate-900/40 transition-all text-slate-300";
+        tr.innerHTML = `
+          <td class="p-4 font-mono text-slate-500 font-bold">${idx + 1}</td>
+          <td class="p-4 font-semibold text-slate-100 flex items-center gap-2">
+            ${user.name} ${user.phone === AppState.currentUser.phone ? '<span class="bg-indigo-500 text-slate-950 px-1.5 py-0.5 rounded text-[8px] font-bold">YOU</span>' : ''}
+          </td>
+          <td class="p-4 font-mono font-bold text-indigo-400">${user.xp || user.xpScore || 0} XP</td>
+          <td class="p-4 font-mono text-amber-400">🔥 ${user.streak || 1} Days</td>
+          <td class="p-4 text-slate-500 italic max-w-xs truncate">${user.goal || user.goalPath || "General Aspirant"}</td>
+        `;
+        rows.appendChild(tr);
+      });
+    }
+
+    // OWNER VERIFICATION AND SECURITY MANAGER
+    function openOwnerLoginModal() {
+      document.getElementById('owner-login-modal').classList.remove('hidden');
+      document.getElementById('owner-password-field').value = "";
+      document.getElementById('owner-auth-error').classList.add('hidden');
+    }
+
+    function closeOwnerLoginModal() {
+      document.getElementById('owner-login-modal').classList.add('hidden');
+    }
+
+    function handleOwnerVaultAuth(e) {
+      e.preventDefault();
+      const code = document.getElementById('owner-password-field').value;
+      if (code === '474474') {
+        closeOwnerLoginModal();
+        switchTab('owner-vault');
+        renderOwnerVaultTable();
+        showInAppNotification("Admin Access Granted.");
+      } else {
+        const error = document.getElementById('owner-auth-error');
+        error.innerText = "Invalid verification key. Access Denied.";
+        error.classList.remove('hidden');
+      }
+    }
+
+    function renderOwnerVaultTable() {
+      const rows = document.getElementById('owner-vault-table-rows');
+      rows.innerHTML = "";
+
+      AppState.allRegistrations.forEach((r, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-900/30 text-slate-300";
+        tr.innerHTML = `
+          <td class="p-4 font-mono text-slate-500 text-[10px] whitespace-nowrap">${r.timestamp || "N/A"}</td>
+          <td class="p-4 font-bold text-slate-100">${r.name}</td>
+          <td class="p-4 font-mono text-slate-400">${r.phone}</td>
+          <td class="p-4 font-mono text-emerald-400">${r.whatsapp}</td>
+          <td class="p-4">${r.place}</td>
+          <td class="p-4 text-slate-500 italic max-w-xs truncate">${r.goal}</td>
+          <td class="p-4 text-center">
+            <button onclick="deleteRecordDirect(${idx})" class="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-slate-950 rounded-lg border border-rose-500/20 transition-all">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        `;
+        rows.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function deleteRecordDirect(idx) {
+      AppState.allRegistrations.splice(idx, 1);
+      localStorage.setItem('knowix_all_records_v2', JSON.stringify(AppState.allRegistrations));
+      renderOwnerVaultTable();
+      showInAppNotification("Registration record purged from databank.");
+    }
+  </script>
+</body>
+</html>
